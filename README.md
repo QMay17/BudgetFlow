@@ -1,10 +1,10 @@
 # BudgetFlow
-### Overview
+## Overview
 
-BudgetFlow is a personal budgeting application designed to help users efficiently manage and track their finances. Developed using Python, this application offers a user-friendly interface for creating profiles, tracking income and expenses, categorizing transactions, and visualizing spending habits through graphs and charts.
+BudgetFlow is a personal budgeting application designed to help users manage and track their finances efficiently. Developed using Python, this application offers a user-friendly interface for creating profiles, tracking income and expenses, categorizing transactions, and visualizing spending habits through graphs and charts.
 
 
-### Features
+## Features
 **User Authentication**: Secure registration and login system
 **Transaction Management**: Add, edit, and delete financial transactions
 **Categorization**: Organize expenses and income into customizable categories
@@ -16,32 +16,32 @@ BudgetFlow is a personal budgeting application designed to help users efficientl
 ## Installation
 ### Prerequisites
 
-Python 3.8+
-Git
+- Python 3.8+
+- Git
 
 ### Steps
 
 1. Clone the repository:
    ```bash
-     // git clone https://github.com/yourusername/BudgetFlow.git
-     // cd BudgetFlow
+     git clone https://github.com/yourusername/BudgetFlow.git
+     cd BudgetFlow
    ```
 
 
 2. Create a virtual environment (recommended):
    ```bash
-     // python -m venv venv
-     // source venv/bin/activate  # On Windows: venv\Scripts\activate
+     python -m venv venv
+     source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 3. Install required packages:
    ```bash
-     // pip install -r requirements.txt
+     pip install -r requirements.txt
    ```
 
 4. Run the application:
    ```bash
-     // python main.py
+     python main.py
    ```
 
 ## Technologies Used
@@ -55,16 +55,24 @@ Git
 ## Development Timeline
 
 Week 1 (Mar 20): Planning and Design
+
 Week 2 (Mar 27): User Authentication System
+
 Week 3 (Apr 3): Transaction Management
+
 Week 4 (Apr 10): Transaction UI & Reporting
+
 Week 5 (Apr 17): Savings Report Management
+
 Week 6 (Apr 24): Data Persistence & Full Reporting
+
 Week 7 (May 1): Testing & Documentation, Final Submission
+
 
 ## Contributors
 
 Samriddhi Matharu
+
 May Sabai
 
 ## Future Enhancements
