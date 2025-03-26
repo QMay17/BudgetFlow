@@ -1,0 +1,71 @@
+BudgetFlow/
+│
+├── src/                        # the main application code
+│   ├── __init__.py
+│   ├── models/                 # database and data models
+│   │   ├── __init__.py
+│   │   ├── user.py
+│   │   ├── transaction.py
+│   │   ├── category.py
+│   │   └── database.py
+│   │
+│   ├── auth/                   # authentication-related modules
+│   │   ├── __init__.py
+│   │   └── registration.py
+│   │
+│   ├── transactions/           # transaction implementation
+│   │   ├── __init__.py
+│   │   ├── transaction_manager.py # database interactions for transactions
+│   │   └── transaction_validator.py
+│   │
+│   ├── visualizations/         # Data visualization
+│   │   ├── __init__.py
+│   │   ├── spending_report.py
+│   │   ├── transaction_summary.py
+│   │   └── savings_journey.py
+│   │
+│   └── utils/                  # untility functions 
+│       ├── __init__.py
+│       └── password_utils.py   # password hashing
+│
+├── data/                       # SQLite database
+│   └── users.db
+│
+├── images                      # background images for user interface (UI)
+└── main.py
+
+BudgetFlow/
+│
+├── src/
+│   ├── __init__.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── user.py
+│   │   ├── transaction.py
+│   │   ├── category.py
+│   │   └── database.py
+│   │
+│   ├── auth/
+│   │   ├── __init__.py
+│   │   └── registration.py
+│   │
+│   ├── transactions/
+│   │   ├── __init__.py
+│   │   ├── transaction_manager.py
+│   │   └── transaction_validator.py
+│   │
+│   ├── visualizations/
+│   │   ├── __init__.py
+│   │   ├── spending_report.py
+│   │   ├── transaction_summary.py
+│   │   └── savings_journey.py
+│   │
+│   └── utils/
+│       ├── __init__.py
+│       └── password_utils.py
+│
+├── data/
+│   └── users.db
+│
+├── requirements.txt
+└── main.py
