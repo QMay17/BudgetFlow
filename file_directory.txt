@@ -1,71 +1,51 @@
+```
 BudgetFlow/
-│
-├── src/                        # the main application code
-│   ├── __init__.py
-│   ├── models/                 # database and data models
+├── src/                    # Primary source code directory
+│   ├── main.py             # Application entry point and main configuration
+│   ├── config.py           # Application-wide settings and configuration
+│   
+│   ├── core/               # Core business logic and computational modules
 │   │   ├── __init__.py
-│   │   ├── user.py
-│   │   ├── transaction.py
-│   │   ├── category.py
-│   │   └── database.py
-│   │
-│   ├── auth/                   # authentication-related modules
+│   │   ├── auth.py         # Authentication and user management logic
+│   │   ├── transactions.py # Core transaction processing and validation
+│   │   ├── reports.py      # Report generation and financial calculations
+│   │   └── budget_manager.py # Budget tracking and goal-setting logic
+│   
+│   ├── models/             # Data models and database interactions
 │   │   ├── __init__.py
-│   │   └── registration.py
-│   │
-│   ├── transactions/           # transaction implementation
+│   │   ├── user.py         # User data model and profile management
+│   │   ├── transaction.py  # Transaction data model and schema
+│   │   ├── category.py     # Expense and income category definitions
+│   │   └── database.py     # Database connection and ORM setup
+│   
+│   ├── ui/                 # User interface components
 │   │   ├── __init__.py
-│   │   ├── transaction_manager.py # database interactions for transactions
-│   │   └── transaction_validator.py
-│   │
-│   ├── visualizations/         # Data visualization
-│   │   ├── __init__.py
-│   │   ├── spending_report.py
-│   │   ├── transaction_summary.py
-│   │   └── savings_journey.py
-│   │
-│   └── utils/                  # untility functions 
+│   │   ├── main_window.py  # Primary application window
+│   │   ├── login_window.py # Authentication UI
+│   │   ├── transaction_ui.py # UI for adding/editing transactions
+│   │   ├── reports_ui.py   # Visualization and report display
+│   │   └── budget_ui.py    # Budget goals and alerts interface
+│   
+│   └── utils/              # Utility functions and helpers
 │       ├── __init__.py
-│       └── password_utils.py   # password hashing
-│
-├── data/                       # SQLite database
-│   └── users.db
-│
-├── images                      # background images for user interface (UI)
-└── main.py
-
-BudgetFlow/
-│
-├── src/
-│   ├── __init__.py
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── user.py
-│   │   ├── transaction.py
-│   │   ├── category.py
-│   │   └── database.py
-│   │
-│   ├── auth/
-│   │   ├── __init__.py
-│   │   └── registration.py
-│   │
-│   ├── transactions/
-│   │   ├── __init__.py
-│   │   ├── transaction_manager.py
-│   │   └── transaction_validator.py
-│   │
-│   ├── visualizations/
-│   │   ├── __init__.py
-│   │   ├── spending_report.py
-│   │   ├── transaction_summary.py
-│   │   └── savings_journey.py
-│   │
-│   └── utils/
-│       ├── __init__.py
-│       └── password_utils.py
-│
-├── data/
-│   └── users.db
-│
-├── requirements.txt
-└── main.py
+│       ├── validators.py   # Input validation helpers
+│       ├── password_utils.py # Secure password handling
+│       └── formatters.py   # Data formatting utilities
+│   
+├── tests/                  # Comprehensive test suite
+│   ├── test_auth.py        # Authentication module tests
+│   ├── test_transactions.py # Transaction processing tests
+│   ├── test_reports.py     # Reporting functionality tests
+│   └── test_budget.py      # Budget goal and tracking tests
+│   
+├── data/                   # Application data storage
+│   ├── users.db            # SQLite user database
+│   └── transactions.db     # Transaction history database
+│   
+├── assets/                 # Static assets
+│   ├── icons/              # Application icons
+│   └── images/             # Background and UI images
+│   
+├── requirements.txt        # Python package dependencies
+└── README.md               # Project overview and quick start guide
+```
