@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetFlow - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="home-page">
+            <div class="money-icons">
+                <div class="money-icon money-left"></div>
+                <div class="money-icon money-right"></div>
+            </div>
+            
+            <div class="content">
+                <h2>You are owning your own finance with</h2>
+                <h1>BudgetFlow<span class="heart">❤️</span></h1>
+                <p>"Your budget, your rules. 🚀 Ready to take charge of your finances?"</p>
+                
+                <div class="buttons">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">Register</a>
+                </div>
+            </div>
+            
+            <div class="icons">
+                <div class="money-bag"></div>
+                <div class="piggy-bank"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='scripts/app.js') }}"></script>
+</body>
+</html>

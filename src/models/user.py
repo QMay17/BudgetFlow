@@ -1,39 +1,25 @@
-from sqlalchemy import Column, Integer, String, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-from src.utils.password_utils import hash_password
-import uuid
+from datetime import datetime
+from models.database import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
-class User(Base):
-    __table__name = 'users'
-
-    id = Column(Integer, primary_key = True)
-    username = Column(String, unique = True, nullable = False)
-    first_name = Column(String, nullable = False)
-    last_name = Column(String, nullable = False)
-    email = Column(String, unique = True, nullable = False)
-    phone_number = Column(String)
-    password_hash = Column(String)
-    email_verified = Column(Boolean, default = False)
-    verification_token = Column(String)
-
-    @classmethod
-    def create_user(cls, session, username, first_name, last_name, email, phone_number):
-        """Create a new user with email verification token"""
+class User(db.Model):
+    __tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    phone_number = db.Column(db.String(20), nullable=True)
+    password_hash = db.Column(db.String(128))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
         
-        verification_token = str(uuid.uuid4())
-
-        new_user = cls(
-            username = username,
-            first_name = first_name,
-            last_name = last_name,
-            email = email,
-            phone_number = phone_number,
-            email_verified = False,
-            verification_token = verification_token
-        )
-
-        session.add(new_user)
-        session.commit()
-
-        return new_user, verification_token
-
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
+    def __repr__(self):
+        return f'<User {self.username}>'

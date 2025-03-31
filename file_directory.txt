@@ -1,8 +1,14 @@
-```
 BudgetFlow/
 ├── src/                    # Primary source code directory
-│   ├── main.py             # Application entry point and main configuration
+│   ├── main.py             # Application entry point with Flask setup
 │   ├── config.py           # Application-wide settings and configuration
+│   
+│   ├── routes/             # New directory for route handlers
+│   │   ├── __init__.py
+│   │   ├── auth_routes.py      # Authentication routes
+│   │   ├── transaction_routes.py  # Transaction handling routes
+│   │   ├── report_routes.py    # Report generation routes
+│   │   └── budget_routes.py    # Budget management routes
 │   
 │   ├── core/               # Core business logic and computational modules
 │   │   ├── __init__.py
@@ -18,13 +24,13 @@ BudgetFlow/
 │   │   ├── category.py     # Expense and income category definitions
 │   │   └── database.py     # Database connection and ORM setup
 │   
-│   ├── ui/                 # User interface components
-│   │   ├── __init__.py
-│   │   ├── main_window.py  # Primary application window
-│   │   ├── login_window.py # Authentication UI
-│   │   ├── transaction_ui.py # UI for adding/editing transactions
-│   │   ├── reports_ui.py   # Visualization and report display
-│   │   └── budget_ui.py    # Budget goals and alerts interface
+│   ├── templates/                     # User interface components (renamed to templates in Flask)
+│   │   ├── main_window.html    # Primary application window
+│   │   ├── login_window.html   # login page
+│   │   ├── create_account.html # create profile page
+│   │   ├── transaction.html    # UI for adding/editing transactions
+│   │   ├── reports.html        # Visualization and report display
+│   │   └── budget.html         # Budget goals and alerts interface
 │   
 │   └── utils/              # Utility functions and helpers
 │       ├── __init__.py
@@ -44,8 +50,11 @@ BudgetFlow/
 │   
 ├── assets/                 # Static assets
 │   ├── icons/              # Application icons
-│   └── images/             # Background and UI images
+│   ├── images/             # Background and UI images
+│   ├── styles/             # CSS files (new)
+│   │   └── main.css        # Main stylesheet
+│   └── scripts/            # JavaScript files (new)
+│       └── app.js          # Client-side functionality
 │   
-├── requirements.txt        # Python package dependencies
+├── requirements.txt        # Python package dependencies (add Flask)
 └── README.md               # Project overview and quick start guide
-```
