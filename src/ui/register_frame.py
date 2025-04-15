@@ -1,4 +1,5 @@
 import tkinter as tk 
+import re
 from tkinter import messagebox
 
 class RegisterFrame(tk.Frame):
@@ -17,13 +18,11 @@ class RegisterFrame(tk.Frame):
             fill="#333333"
         )
 
-        #new stuff 
 
         # Dictionary to hold entry widgets
         self.entries = {}
         fields = ["Full Name", "Email", "Username", "Password", "Confirm Password"]
 
-        # Starting vertical position
         y_pos = 220
 
         for field in fields:
@@ -38,26 +37,30 @@ class RegisterFrame(tk.Frame):
         register_btn = tk.Button(self, text="Register", command=self.submit_registration)
         self.canvas.create_window(400, y_pos + 20, window=register_btn)
 
-#new 
     def submit_registration(self):
         user_data = {k: v.get().strip() for k, v in self.entries.items()}
 
-    # 1. Check for empty fields
+    # Check for empty fields
         for field, value in user_data.items():
             if value == "":
                 messagebox.showerror("Missing Info", f"Please enter {field}.")
                 return
 
-    # 2. Check that passwords match
-            if user_data["Password"] != user_data["Confirm Password"]:
-                messagebox.showerror("Password Error", "Passwords do not match.")
-                return
+    # Check if email is valid format
+        email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+        if not re.match(email_pattern, user_data["Email"]):
+            messagebox.showerror("Invalid Email", "Please enter a valid email address.")
+            return
 
-    # 3. Optionally check for password length
-            if len(user_data["Password"]) < 6:
-                messagebox.showwarning("Weak Password", "Password should be at least 6 characters.")
-                return
+    # Check that passwords match
+        if user_data["Password"] != user_data["Confirm Password"]:
+            messagebox.showerror("Password Error", "Passwords do not match.")
+            return
 
-    # If everything passes:
-            print(" Registration Data Validated:", user_data)
-            messagebox.showinfo("Success", "Registration validated!")
+    # check for password length
+        if len(user_data["Password"]) < 6:
+            messagebox.showwarning("Weak Password", "Password should be at least 6 characters.")
+            return
+
+        print(" Registration Data Validated:", user_data)
+        messagebox.showinfo("Success", "Registration validated!")
