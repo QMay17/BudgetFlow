@@ -47,6 +47,8 @@ BudgetFlow/
 ├── data/                   # Application data storage
 │   ├── users.db            # SQLite user database
 │   └── transactions.db     # Transaction history database
+|
+├── setup_db.py             # Script to initialize database
 │   
 ├── assets/                 # Static assets
 │   ├── icons/              # Application icons
