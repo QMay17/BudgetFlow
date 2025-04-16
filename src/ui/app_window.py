@@ -46,9 +46,10 @@ class AppWindow(tk.Frame):
             command=lambda: controller.show_frame("login"),
             width=10,
             height=1,
+            bg="#fffece"  # Updated color
         )
-        login_button_window = self.canvas.create_window(400, 445, window=login_button)
-        
+        login_button_window = self.canvas.create_window(400, 385, window=login_button)
+
         # Register button
         register_button = tk.Button(
             self,
@@ -58,6 +59,7 @@ class AppWindow(tk.Frame):
             command=lambda: controller.show_frame("register"),
             width=10,
             height=1,
+            bg="#fffece"  # Updated color
         )
         register_button_window = self.canvas.create_window(400, 445, window=register_button)
 

@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.ui.app_window import AppWindow 
 from src.ui.login_frame import LoginFrame
 from src.ui.register_frame import RegisterFrame
+from src.ui.profile_frame import ProfileFrame
 from src.ui.budget_frame import BudgetFrame 
 from src.ui.report_frame import ReportFrame 
 from src.ui.transaction_frame import TransactionFrame 
@@ -57,6 +58,11 @@ class BudgetFlowApp(tk.Tk):
         register_frame = RegisterFrame(self.container, self)
         self.frames["register"] = register_frame
         register_frame.grid(row=0, column=0, sticky="nsew")
+
+        # Profile Frame
+        profile_frame = ProfileFrame(self.container, self)
+        self.frames["profile"] = profile_frame
+        profile_frame.grid(row=0, column=0, sticky="nsew")
     
     def show_frame(self, frame_name):
         """Show the frame with the given name"""

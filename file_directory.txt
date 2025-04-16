@@ -1,14 +1,24 @@
 BudgetFlow/
 ├── src/                    # Primary source code directory
-│   ├── main.py             # Application entry point with Flask setup
+│   ├── main.py             # Application entry point with Tkinter setup
 │   ├── config.py           # Application-wide settings and configuration
 │   
-│   ├── routes/             # New directory for route handlers
+│   ├── ui/                 # User interface components (replaces templates)
 │   │   ├── __init__.py
-│   │   ├── auth_routes.py      # Authentication routes
-│   │   ├── transaction_routes.py  # Transaction handling routes
-│   │   ├── report_routes.py    # Report generation routes
-│   │   └── budget_routes.py    # Budget management routes
+│   │   ├── app_window.py   # Main application window
+│   │   ├── login_frame.py  # Login screen
+│   │   ├── register_frame.py # Account creation screen
+│   │   ├── transaction_frame.py # UI for adding/editing transactions
+│   │   ├── report_frame.py # Visualization and report display
+│   │   ├── budget_frame.py # Budget goals and alerts interface
+│   │   └── common_widgets.py # Reusable Tkinter widgets/components
+│   
+│   ├── controllers/        # Logic connecting UI to core functionality
+│   │   ├── __init__.py
+│   │   ├── auth_controller.py    # Authentication controller
+│   │   ├── transaction_controller.py # Transaction handling controller
+│   │   ├── report_controller.py  # Report generation controller
+│   │   └── budget_controller.py  # Budget management controller
 │   
 │   ├── core/               # Core business logic and computational modules
 │   │   ├── __init__.py
@@ -22,21 +32,14 @@ BudgetFlow/
 │   │   ├── user.py         # User data model and profile management
 │   │   ├── transaction.py  # Transaction data model and schema
 │   │   ├── category.py     # Expense and income category definitions
-│   │   └── database.py     # Database connection and ORM setup
-│   
-│   ├── templates/                     # User interface components (renamed to templates in Flask)
-│   │   ├── main_window.html    # Primary application window
-│   │   ├── login_window.html   # login page
-│   │   ├── create_account.html # create profile page
-│   │   ├── transaction.html    # UI for adding/editing transactions
-│   │   ├── reports.html        # Visualization and report display
-│   │   └── budget.html         # Budget goals and alerts interface
+│   │   └── database.py     # Database connection setup
 │   
 │   └── utils/              # Utility functions and helpers
 │       ├── __init__.py
 │       ├── validators.py   # Input validation helpers
 │       ├── password_utils.py # Secure password handling
-│       └── formatters.py   # Data formatting utilities
+│       ├── formatters.py   # Data formatting utilities
+│       └── tk_helpers.py   # Tkinter-specific helper functions
 │   
 ├── tests/                  # Comprehensive test suite
 │   ├── test_auth.py        # Authentication module tests
@@ -45,18 +48,16 @@ BudgetFlow/
 │   └── test_budget.py      # Budget goal and tracking tests
 │   
 ├── data/                   # Application data storage
-│   ├── users.db            # SQLite user database
+│   ├── budgetflow.db       # SQLite user database
 │   └── transactions.db     # Transaction history database
-|
+│
 ├── setup_db.py             # Script to initialize database
 │   
 ├── assets/                 # Static assets
-│   ├── icons/              # Application icons
+│   ├── icons/              # Application and button icons
 │   ├── images/             # Background and UI images
-│   ├── styles/             # CSS files (new)
-│   │   └── main.css        # Main stylesheet
-│   └── scripts/            # JavaScript files (new)
-│       └── app.js          # Client-side functionality
+│   └── themes/             # Tkinter theme files
+│       └── default.py      # Default theme settings
 │   
-├── requirements.txt        # Python package dependencies (add Flask)
+├── requirements.txt        # Python package dependencies (remove Flask, add matplotlib/other vis tools)
 └── README.md               # Project overview and quick start guide
