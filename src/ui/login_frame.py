@@ -114,18 +114,14 @@ class LoginFrame(tk.Frame):
             self.login_frame.place_configure(relx=0.5, rely=0.5)
     
     def login(self):
-        """Handle login button click"""
         username = self.username_entry.get()
         password = self.password_entry.get()
-        
-        # This is a placeholder - in a real app you'd verify against database
-        if username and password:
-            # Hide current frame
-            self.Hide()
 
-            profile_frame = ProfileFrame(parent=None, user=username)
-
-            profile_frame.Show()
-
-        else:
+        if not username or not password:
             messagebox.showerror("Login Error", "Please enter both username and password")
+            return
+
+        success = self.controller.auth_controller.handle_login(username, password)
+
+        if success:
+            self.controller.show_frame("profile")

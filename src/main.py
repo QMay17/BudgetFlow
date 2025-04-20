@@ -18,11 +18,13 @@ from src.ui.register_frame import RegisterFrame
 from src.ui.profile_frame import ProfileFrame
 from src.ui.budget_frame import BudgetFrame 
 from src.ui.report_frame import ReportFrame 
-from src.ui.transaction_frame import TransactionFrame 
+from src.ui.transaction_frame import TransactionFrame
+from src.controllers.auth_controller import AuthController 
 
 class BudgetFlowApp(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.auth_controller = AuthController(self)
 
         # Configure the window
         self.title("BudgetFlow")

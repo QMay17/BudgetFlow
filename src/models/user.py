@@ -79,10 +79,10 @@ class User:
             conn.close()
 
     @classmethod
-    def find_by_usernmae(cls, username):
+    def find_by_username(cls, username):
         """Find a user by username"""
         conn = get_db_connection()
-        user = conn.execute('SELECT * FROM username = ?', (username,)).fetchone()
+        user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
         conn.close()
         return cls._row_to_user(user) if user else None
     

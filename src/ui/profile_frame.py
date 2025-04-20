@@ -3,9 +3,10 @@ from tkinter import ttk, messagebox
 from pathlib import Path
 
 class ProfileFrame(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, user=None):
         super().__init__(parent)
         self.controller = controller
+        self.user=user
         
         # Create and place background canvas
         self.canvas = tk.Canvas(self, width=800, height=600, highlightthickness=0, bg="#f1e7e7")
