@@ -20,6 +20,7 @@ from src.ui.budget_frame import BudgetFrame
 from src.ui.report_frame import ReportFrame 
 from src.ui.transaction_frame import TransactionFrame
 from src.controllers.auth_controller import AuthController 
+from src.ui.savings_frame import SavingsFrame
 
 class BudgetFlowApp(tk.Tk):
     def __init__(self):
@@ -33,7 +34,13 @@ class BudgetFlowApp(tk.Tk):
 
         # Create a container for all frames
         self.container = tk.Frame(self)
-        self.container.pack(fill="both", expand=True)
+        self.container.grid(row=0, column=0, sticky="nsew")
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+
+
 
         # Dictionary to store frames
         self.frames = {}
@@ -43,6 +50,7 @@ class BudgetFlowApp(tk.Tk):
 
         # Show the Welcome frame
         self.show_frame("welcome")
+        #self.show_frame("transaction") (uncomment this to run transaction page)
 
     def setup_frames(self):
         """Initialize all frames and add them to the frames dictionary"""
@@ -62,9 +70,20 @@ class BudgetFlowApp(tk.Tk):
         register_frame.grid(row=0, column=0, sticky="nsew")
 
         # Profile Frame
-        profile_frame = ProfileFrame(self.container, self)
-        self.frames["profile"] = profile_frame
-        profile_frame.grid(row=0, column=0, sticky="nsew")
+        #profile_frame = ProfileFrame(self.container, self)
+        #self.frames["profile"] = profile_frame
+        #profile_frame.grid(row=0, column=0, sticky="nsew")
+
+        # Transaction Frame
+        transaction_frame = TransactionFrame(self.container, self)
+        self.frames["transaction"] = transaction_frame
+        transaction_frame.grid(row=0, column=0, sticky="nsew")
+
+
+       # Savings Frame 
+        savings_frame = SavingsFrame(self.container, self)
+        self.frames["savings"] = savings_frame
+        savings_frame.grid(row=0, column=0, sticky="nsew")
     
     def show_frame(self, frame_name):
         """Show the frame with the given name"""
