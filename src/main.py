@@ -50,13 +50,13 @@ class BudgetFlowApp(tk.Tk):
 
         # Show the Welcome frame
         self.show_frame("welcome")
-        #self.show_frame("transaction") (uncomment this to run transaction page)
+        #self.show_frame("transaction") #(uncomment this to run transaction page)
 
     def setup_frames(self):
         """Initialize all frames and add them to the frames dictionary"""
         # Welcome Frame
         app_window = AppWindow(self.container, self)
-        self.frames["welcome"] = app_window
+        self.frames["welcome"]= app_window
         app_window.grid(row=0, column=0, sticky="nsew")
         
         # Login Frame
@@ -70,9 +70,9 @@ class BudgetFlowApp(tk.Tk):
         register_frame.grid(row=0, column=0, sticky="nsew")
 
         # Profile Frame
-        #profile_frame = ProfileFrame(self.container, self)
-        #self.frames["profile"] = profile_frame
-        #profile_frame.grid(row=0, column=0, sticky="nsew")
+        profile_frame = ProfileFrame(self.container, self)
+        self.frames["profile"] = profile_frame
+        profile_frame.grid(row=0, column=0, sticky="nsew")
 
         # Transaction Frame
         transaction_frame = TransactionFrame(self.container, self)

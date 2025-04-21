@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from src.models.transaction import save_transaction
+
 
 class TransactionFrame(tk.Frame):
     def __init__(self, parent, controller, user=None):
@@ -68,6 +70,11 @@ class TransactionFrame(tk.Frame):
         # --------- Back Button ---------
         tk.Button(self.canvas, text="Back to Profile", font=("Comic Sans MS", 12), bg="#fffece",
                   command=lambda: controller.show_frame("profile")).place(x=320, y=580)
+        
+        # Done adding transactions button
+        tk.Button(self.canvas, text="Done", font=("Comic Sans MS", 12), bg="#d4fcd4",
+          command=self.finish_session).place(x=440, y=580)
+
 
         # Resize handling
         self.bind("<Configure>", self.on_resize)
@@ -99,6 +106,11 @@ class TransactionFrame(tk.Frame):
             "type": trans_type
         })
 
+        # Save to database (for both Saving and Expense)
+        save_transaction(category, amount, trans_type)
+        messagebox.showinfo("Success", f"Saved ${amount:.2f} to {category} as {trans_type}")
+
+
         # Insert into table
         self.transaction_table.insert("", tk.END, values=(category, f"${amount:.2f}", trans_type))
 
@@ -106,3 +118,8 @@ class TransactionFrame(tk.Frame):
         self.amount_entry.delete(0, tk.END)
         self.category_dropdown.set("Savings")
         self.type_dropdown.set("Saving")
+
+    def finish_session(self):
+        messagebox.showinfo("Done", "All transactions saved!")
+        self.controller.show_frame("profile")
+

@@ -30,12 +30,23 @@ def init_db():
         password_hash TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-''')
+    ''')
+
+    # Create transactions table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS transactions(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category TEXT NOT NULL,
+        amount REAL NOT NULL,
+        type TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    ''')
 
     conn.commit()
     conn.close()
 
-    print("Database initialized at {DB_PATH}")
+    print(f"Database initialized at {DB_Path}")
 
 # Initialize the database when this module is imported
 init_db()
