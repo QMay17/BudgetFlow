@@ -48,24 +48,52 @@ class TransactionFrame(tk.Frame):
         tk.Button(self.form_frame, text="Add Transaction", font=("Comic Sans MS", 12), bg="#fffece",
                   command=self.add_transaction).grid(row=3, column=0, columnspan=2, pady=15)
 
-        # --------- Transaction Table ---------
+        # --------- Transaction Table (with scrollbar) ---------
         self.table_frame = tk.Frame(self.canvas, bg="#f1e7e7")
         self.canvas.create_window(400, 360, window=self.table_frame, anchor="n")
 
-        # Treeview styling
-        style = ttk.Style()
-        style.theme_use("default")
-        style.configure("Treeview", rowheight=25, font=("Comic Sans MS", 10))
-        style.configure("Treeview.Heading", font=("Comic Sans MS", 11, "bold"))
-
         columns = ("Category", "Amount", "Type")
-        self.transaction_table = ttk.Treeview(self.table_frame, columns=columns, show="headings", height=6)
+
+        self.tree_container = tk.Frame(self.table_frame, bg="#f1e7e7")
+        self.tree_container.pack()
+
+        self.transaction_table = ttk.Treeview(
+            self.tree_container,
+            columns=columns,
+            show="headings",
+            height=6
+        )
+
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(self.tree_container, orient="vertical", command=self.transaction_table.yview)
+        self.transaction_table.configure(yscrollcommand=scrollbar.set)
+
+        self.transaction_table.pack(side="left")
+        scrollbar.pack(side="right", fill="y")
 
         for col in columns:
             self.transaction_table.heading(col, text=col)
             self.transaction_table.column(col, anchor="center", width=140)
 
-        self.transaction_table.pack()
+        # 💡 Right-click instruction label (outside table)
+        tip_label = tk.Label(self.table_frame,
+            text="💡 Right-click a transaction row to edit or delete it.",
+            font=("Comic Sans MS", 10),
+            bg="#f1e7e7",
+            fg="#444"
+        )
+        tip_label.pack(pady=(5, 10))
+
+                
+
+        # --- Right-click menu ---
+        self.context_menu = tk.Menu(self, tearoff=0)
+        self.context_menu.add_command(label="Edit", command=self.edit_selected)
+        self.context_menu.add_command(label="Delete", command=self.delete_selected)
+
+        # Bind right-click to Treeview
+        self.transaction_table.bind("<Button-3>", self.show_context_menu)
+
 
         # --------- Back Button ---------
         tk.Button(self.canvas, text="Back to Profile", font=("Comic Sans MS", 12), bg="#fffece",
@@ -119,7 +147,92 @@ class TransactionFrame(tk.Frame):
         self.category_dropdown.set("Savings")
         self.type_dropdown.set("Saving")
 
+
+    def show_context_menu(self, event):
+    # Select the row under mouse before showing menu
+        item_id = self.transaction_table.identify_row(event.y)
+        if item_id:
+            self.transaction_table.selection_set(item_id)
+            self.context_menu.post(event.x_root, event.y_root)
+
+
+    #deleting and editing transactions 
+
+    #deleting 
+    def delete_selected(self):
+        selected = self.transaction_table.selection()
+        if not selected:
+            messagebox.showwarning("No selection", "Please select a transaction to delete.")
+            return
+
+        item = self.transaction_table.item(selected[0])
+        values = item['values']
+        category, amount_text, trans_type = values
+        amount = float(amount_text.strip("$"))
+
+        confirm = messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete this {trans_type.lower()} of ${amount:.2f} in '{category}'?")
+        if not confirm:
+            return
+
+        # Delete from DB
+        from src.models.database import get_db_connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+        DELETE FROM transactions 
+        WHERE rowid = (
+            SELECT rowid FROM transactions 
+            WHERE category=? AND amount=? AND type=?
+            LIMIT 1
+        )
+    """, (category, amount, trans_type))
+        conn.commit()
+        conn.close()
+
+        # Delete from table
+        self.transaction_table.delete(selected[0])
+        messagebox.showinfo("Deleted", "Transaction deleted.")
+
+    #edits transactions by deleting first and modifying 
+    def edit_selected(self):
+        selected = self.transaction_table.selection()
+        if not selected:
+            messagebox.showwarning("No selection", "Please select a transaction to edit.")
+            return
+
+        item = self.transaction_table.item(selected[0])
+        values = item['values']
+        category, amount_text, trans_type = values
+
+        # Pre-fill inputs
+        self.category_dropdown.set(category)
+        self.amount_entry.delete(0, tk.END)
+        self.amount_entry.insert(0, amount_text.strip("$"))
+        self.type_dropdown.set(trans_type)
+
+        # Remove original entry from table and DB (optional)
+        self.transaction_table.delete(selected[0])
+
+        from src.models.database import get_db_connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+        DELETE FROM transactions 
+        WHERE rowid = (
+            SELECT rowid FROM transactions 
+            WHERE category=? AND amount=? AND type=?
+            LIMIT 1
+        )
+    """, (category, float(amount_text.strip("$")), trans_type))
+        conn.commit()
+        conn.close()
+
+        messagebox.showinfo("Edit Mode", "Now modify the inputs and click 'Add Transaction' to re-save.")
+
+
+
     def finish_session(self):
         messagebox.showinfo("Done", "All transactions saved!")
         self.controller.show_frame("profile")
 
+    

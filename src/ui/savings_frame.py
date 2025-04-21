@@ -1,112 +1,115 @@
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import ttk, messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
+from src.models.transaction import load_all_transactions
+from datetime import datetime
 
 class SavingsFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
+        self.configure(bg="#f1e7e7")
+
         self.saved_amount = 0
-        self.savings_goal = 0  # User sets this
+        self.chart_canvas = None
+        self.text_label = None
 
-        # first this: Category selection
-        tk.Label(self, text="Select Saving Category:").pack(pady=5)
-        self.category_dropdown = ttk.Combobox(self, values=["Savings", "Vacation", "Emergency", "Education", "Other"])
-        self.category_dropdown.set("Savings")
-        self.category_dropdown.pack()
+        # Title
+        self.title_label = tk.Label(self, text="Savings Goal Tracker", font=("Comic Sans MS", 24, "bold"), bg="#f1e7e7", fg="#333333")
+        self.title_label.pack(pady=20)
 
-        # Set goal input
-        tk.Label(self, text="Enter Savings Goal ($):").pack(pady=5)
-        self.goal_entry = tk.Entry(self)
-        self.goal_entry.pack()
+        # Main container
+        main_frame = tk.Frame(self, bg="#f1e7e7")
+        main_frame.pack(expand=True, fill="both", padx=20, pady=10)
 
-        tk.Button(self, text="Set Goal", command=self.set_goal).pack(pady=5)
+        # Left: form
+        self.form_frame = tk.Frame(main_frame, bg="white", bd=2, relief="groove")
+        self.form_frame.place(relx=0.05, rely=0.05, relwidth=0.4, relheight=0.9)
 
-        
-        # Amount saved input
-        tk.Label(self, text="Amount Saved:").pack(pady=5)
-        self.amount_entry = tk.Entry(self)
-        self.amount_entry.pack()
+        # Goal inputs
+        tk.Label(self.form_frame, text="What do you want to save for?", font=("Comic Sans MS", 12), bg="white").pack(pady=10)
+        self.goal_dropdown = ttk.Combobox(self.form_frame, values=["Vacation", "Emergency", "Education", "Food", "Rent", "Shopping"])
+        self.goal_dropdown.set("Vacation")
+        self.goal_dropdown.pack()
 
-        # Buttons
-        tk.Button(self, text="Add Saving", command=self.add_saving).pack(pady=10)
-        tk.Button(self, text="Show Pie Chart", command=self.show_pie_chart).pack(pady=5)
-        tk.Button(self, text="Show Bar Chart", command=self.show_bar_chart).pack(pady=5)
+        tk.Label(self.form_frame, text="How much do you want to save? ($)", font=("Comic Sans MS", 12), bg="white").pack(pady=10)
+        self.goal_amount_entry = tk.Entry(self.form_frame)
+        self.goal_amount_entry.pack()
 
-        # Back to Profile button
-        tk.Button(
-            self,
-            text="Back to Profile",
-            font=("Comic Sans MS", 12),
-            bg="#fffece",
-            command=lambda: self.controller.show_frame("profile")
-        ).pack(pady=10)
+        tk.Label(self.form_frame, text="By when? (YYYY-MM-DD)", font=("Comic Sans MS", 12), bg="white").pack(pady=10)
+        self.deadline_entry = tk.Entry(self.form_frame)
+        self.deadline_entry.pack()
 
-    def set_goal(self):
-        try:
-            new_goal = float(self.goal_entry.get())
-            if new_goal <= 0:
-                raise ValueError
-            self.savings_goal = new_goal
-            messagebox.showinfo("Goal Set", f"Savings goal set to ${new_goal}")
-            self.goal_entry.delete(0, tk.END)
-        except ValueError:
-            messagebox.showerror("Invalid Input", "Please enter a positive number for your savings goal.")
+        tk.Button(self.form_frame, text="Show Pie Chart", font=("Comic Sans MS", 10), bg="#d2f8d2", command=self.show_pie_chart).pack(pady=10)
+        tk.Button(self.form_frame, text="Show Bar Chart", font=("Comic Sans MS", 10), bg="#cfe2ff", command=self.show_bar_chart).pack(pady=5)
+        tk.Button(self.form_frame, text="Back to Profile", font=("Comic Sans MS", 10), bg="#fffece", command=lambda: self.controller.show_frame("profile")).pack(pady=20)
 
-    def add_saving(self):
-        try:
-            amount = float(self.amount_entry.get())
-            category = self.category_dropdown.get()
-            self.current_category = category 
-
-            if categorize_input(category) == "saving":
-                self.saved_amount += amount
-                messagebox.showinfo("Success", f"Added ${amount} to savings.")
-            else:
-                messagebox.showwarning("Not a saving category", "This input is not categorized as saving.")
-
-            self.amount_entry.delete(0, tk.END)
-            self.category_dropdown.set("Savings")
-
-        except ValueError:
-            messagebox.showerror("Invalid input", "Please enter a valid number.")
+        # Right: Chart display
+        self.chart_frame = tk.Frame(main_frame, bg="#f1e7e7")
+        self.chart_frame.place(relx=0.5, rely=0.05, relwidth=0.45, relheight=0.9)
 
     def show_pie_chart(self):
-        if self.savings_goal <= 0:
-            messagebox.showerror("No Goal Set", "Please set a savings goal first.")
+        self.clear_chart()
+        category = self.goal_dropdown.get()
+        try:
+            goal_amount = float(self.goal_amount_entry.get())
+        except ValueError:
+            messagebox.showerror("Invalid", "Enter a valid goal amount.")
             return
 
-        saved = min(self.saved_amount, self.savings_goal)
-        remaining = max(0, self.savings_goal - saved)
+        saved_total = sum(tx["amount"] for tx in load_all_transactions() if tx["type"].lower() == "saving" and tx["category"].lower() == category.lower())
+        remaining = max(0, goal_amount - saved_total)
 
-        category = getattr(self, "current_category", "your goal")  # fallback if nothing added yet
+        fig, ax = plt.subplots(figsize=(4, 4))
+        ax.pie([saved_total, remaining], labels=["Saved", "Remaining"], autopct='%1.1f%%', colors=["#76c7c0", "#f7b7a3"])
+        ax.set_title(f"Savings Progress for {category}")
 
-        fig, ax = plt.subplots()
-        ax.pie([saved, remaining], labels=["Saved", "Remaining"], autopct='%1.1f%%')
-        ax.set_title(f"Savings Progress for {category} (Goal: ${self.savings_goal:.2f})")
-        self.display_chart(fig)
+        self.chart_canvas = FigureCanvasTkAgg(fig, master=self.chart_frame)
+        self.chart_canvas.draw()
+        self.chart_canvas.get_tk_widget().pack()
 
     def show_bar_chart(self):
-        # Dummy weekly data for demo
-        weeks = ["Week 1", "Week 2", "Week 3", "Week 4"]
-        goal = [100, 100, 100, 100]
-        actual = [80, 60, 90, self.saved_amount]
+        self.clear_chart()
+        category = self.goal_dropdown.get()
+        try:
+            goal_amount = float(self.goal_amount_entry.get())
+        except ValueError:
+            messagebox.showerror("Invalid", "Enter a valid goal amount.")
+            return
 
-        category = getattr(self, "current_category", "your goal")
+        deadline = self.deadline_entry.get()
+        try:
+            deadline_date = datetime.strptime(deadline, "%Y-%m-%d")
+        except ValueError:
+            messagebox.showerror("Invalid", "Enter a valid date in YYYY-MM-DD format.")
+            return
 
-        fig, ax = plt.subplots()
-        ax.bar(weeks, goal, label="Goal", alpha=0.5)
-        ax.bar(weeks, actual, label="Actual", alpha=0.7)
-        ax.set_title("Weekly Savings Comparison for {category} ${self.savings_goal:.2f})")
-        ax.legend()
-        self.display_chart(fig)
+        today = datetime.today()
+        weeks_remaining = max(1, (deadline_date - today).days // 7)
+        saved_total = sum(tx["amount"] for tx in load_all_transactions() if tx["type"].lower() == "saving" and tx["category"].lower() == category.lower())
 
-    def display_chart(self, fig):
-        canvas = FigureCanvasTkAgg(fig, master=self)
-        canvas.draw()
-        canvas.get_tk_widget().pack(pady=10)
+        weekly_target = goal_amount / weeks_remaining
+        weekly_actual = saved_total / weeks_remaining
 
-def categorize_input(category):
-    savings_keywords = ["savings", "goal", "emergency", "vacation", "education"]
-    return "saving" if category.lower() in savings_keywords else "expense"
+        fig, ax = plt.subplots(figsize=(4, 3))
+        ax.bar(["Weekly Target", "Weekly Saved"], [weekly_target, weekly_actual], color=["#fdd365", "#b0c4de"])
+        ax.set_title("Weekly Savings Target vs Actual")
+
+        self.chart_canvas = FigureCanvasTkAgg(fig, master=self.chart_frame)
+        self.chart_canvas.draw()
+        self.chart_canvas.get_tk_widget().pack()
+
+        # Show smart suggestion
+        remaining = max(0, goal_amount - saved_total)
+        suggestion = f"You need to save ~${remaining/weeks_remaining:.2f} per week to meet your goal by {deadline}."
+        self.text_label = tk.Label(self.chart_frame, text=suggestion, font=("Comic Sans MS", 10), bg="#f1e7e7", fg="#333")
+        self.text_label.pack(pady=5)
+
+    def clear_chart(self):
+        if self.chart_canvas:
+            self.chart_canvas.get_tk_widget().destroy()
+            self.chart_canvas = None
+        if self.text_label:
+            self.text_label.destroy()
+            self.text_label = None

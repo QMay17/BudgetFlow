@@ -50,6 +50,7 @@ class BudgetFlowApp(tk.Tk):
 
         # Show the Welcome frame
         self.show_frame("welcome")
+        #self.show_frame("savings")
         #self.show_frame("transaction") #(uncomment this to run transaction page)
 
     def setup_frames(self):
