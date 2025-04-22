@@ -6,25 +6,25 @@ from datetime import datetime
 from .database import get_db_connection
 
 class User:
-    def __init__(self, username = None, email = None, full_name = None, password_hash = None, id = None, created_at = None):
+    def __init__(self, id=None, username=None, email=None, full_name=None, password_hash=None, created_at=None):
         self.id = id
         self.username = username
         self.email = email
         self.full_name = full_name
         self.password_hash = password_hash
-        self_created_at = created_at or datetime.now()
+        self.created_at = created_at or datetime.now()
 
     @staticmethod
     def hash_password(password):
         """Hash a password using SHA-256 with salt."""
-        salt = os.urandom(32) # 32 bytes of random salt
-        key = hashlib.pdkd2_hmac(
+        salt = os.urandom(32)  # 32 bytes of random salt
+        key = hashlib.pbkdf2_hmac(
             'sha256',
             password.encode('utf-8'),
             salt,
-            100000 # Number of iterations
+            100000  # Number of iterations
         )
-        # store salt and key together
+        # Store salt and key together
         return salt.hex() + ':' + key.hex()
     
     @staticmethod
@@ -35,14 +35,14 @@ class User:
         salt = bytes.fromhex(salt_hex)
 
         # Hash the provided password with the same salt
-        key = hashlib.pdkd2_hmac(
+        key = hashlib.pbkdf2_hmac(
             'sha256',
             provided_password.encode('utf-8'),
             salt,
             100000
         )
 
-        # Compared the computed key with the stored key
+        # Compare the computed key with the stored key
         return key.hex() == key_hex
     
     @classmethod
@@ -56,14 +56,14 @@ class User:
 
         try:
             cursor.execute(
-                'INSERT INTO users(username, email, full_name, password_hash) VALUES(?, ?, ?, ?)'
+                'INSERT INTO users (username, email, full_name, password_hash) VALUES (?, ?, ?, ?)',
                 (username, email, full_name, password_hash)
             )
             conn.commit()
             user_id = cursor.lastrowid
 
             # Fetch the created user
-            user = cursor.execute('SELECT * FROM users WHERE id = ?', (user_id)).fetchone()
+            user = cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
             return cls._row_to_user(user)
         except sqlite3.IntegrityError as e:
             # When username or email has already existed
@@ -71,10 +71,9 @@ class User:
             if "UNIQUE constraint failed: users.username" in str(e):
                 raise ValueError(f"Username '{username}' is already taken.")
             elif 'UNIQUE constraint failed: users.email' in str(e):
-                raise ValueError(f"Email '{email}' is already in use. Would you like to login instead?")
+                raise ValueError(f"Email '{email}' is already in use.")
             else:
                 raise e
-            
         finally:
             conn.close()
 
@@ -100,12 +99,13 @@ class User:
         if not row:
             return None
         return cls(
-            id = row['id'],
-            username = row['username'],
-            email = row['email'],
-            full_name = row['full_name'],
-            password_hash = row['password_hash'],
-            created_at = row['created_at']
+            id=row['id'],
+            username=row['username'],
+            email=row['email'],
+            full_name=row['full_name'],
+            password_hash=row['password_hash'],
+            created_at=row['created_at']
         )
+        
     def __str__(self):
         return f"User(id={self.id}, username={self.username}, email={self.email})"

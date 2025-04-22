@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from pathlib import Path
-from src.ui.profile_frame import ProfileFrame
 
 class LoginFrame(tk.Frame):
     def __init__(self, parent, controller):
@@ -114,6 +113,7 @@ class LoginFrame(tk.Frame):
             self.login_frame.place_configure(relx=0.5, rely=0.5)
     
     def login(self):
+        """Handle the login process"""
         username = self.username_entry.get()
         password = self.password_entry.get()
 
@@ -121,7 +121,19 @@ class LoginFrame(tk.Frame):
             messagebox.showerror("Login Error", "Please enter both username and password")
             return
 
+        # Pass credentials to the auth controller
         success = self.controller.auth_controller.handle_login(username, password)
 
         if success:
+            # Update profile information
+            if "profile" in self.controller.frames:
+                profile_frame = self.controller.frames["profile"]
+                if hasattr(profile_frame, "update_profile_info"):
+                    profile_frame.update_profile_info()
+            
+            # Navigate to profile page
             self.controller.show_frame("profile")
+            
+            # Clear entries for security
+            self.username_entry.delete(0, tk.END)
+            self.password_entry.delete(0, tk.END)

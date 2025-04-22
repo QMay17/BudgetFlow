@@ -8,9 +8,10 @@ BudgetFlow/
 │   │   ├── app_window.py   # Main application window
 │   │   ├── login_frame.py  # Login screen
 │   │   ├── register_frame.py # Account creation screen
+│   │   ├── profile_frame.py # User profile screen
 │   │   ├── transaction_frame.py # UI for adding/editing transactions
 │   │   ├── report_frame.py # Visualization and report display
-│   │   ├── budget_frame.py # Budget goals and alerts interface
+│   │   ├── saving_frame.py # Budget goals and alerts interface
 │   │   └── common_widgets.py # Reusable Tkinter widgets/components
 │   
 │   ├── controllers/        # Logic connecting UI to core functionality

@@ -48,7 +48,7 @@ class AuthController:
         
         if success:
             messagebox.showinfo("Success", "Login successful!")
-            self.app_controller.show_frame("dashboard")
+            self.app_controller.show_frame("profile")
             return True
         else:
             messagebox.showerror("Login Error", message)

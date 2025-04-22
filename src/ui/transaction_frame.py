@@ -9,156 +9,464 @@ class TransactionFrame(tk.Frame):
         self.controller = controller
         self.user = user
         self.transactions = []  # to store all transactions
+        self.total_expenses = 0
+        self.expense_categories = {
+            "Living expenses": 0,
+            "Transportation": 0,
+            "Healthcare": 0,
+            "Groceries": 0,
+            "Personal spending": 0,
+            "Recreation": 0
+        }
+        self.total_income = 4000  # Default income value
+        self.income_types = ["Paycheck", "Investment", "Scholarships", "Bonuses", "Others"]
 
-        # Background canvas
-        self.canvas = tk.Canvas(self, highlightthickness=0, bg="#f1e7e7")
-        self.canvas.pack(fill="both", expand=True)
-
+        # Main background
+        self.configure(bg="#f5efef")
+        
         # Title text
-        self.title_text = self.canvas.create_text(
-            400, 70,
-            text="Transaction Page",
-            font=("Comic Sans MS", 24, "bold"),
-            fill="#333333"
+        self.title_label = tk.Label(
+            self,
+            text="Budget Tracker",
+            font=("Comic Sans MS", 20, "bold"),
+            bg="#f5efef",
+            fg="#333333"
         )
+        self.title_label.grid(row=0, column=0, columnspan=4, pady=(15, 20), sticky="n")
 
-        # --------- Input Form ---------
-        self.form_frame = tk.Frame(self.canvas, bg="#f1e7e7")
-        self.canvas.create_window(400, 150, window=self.form_frame, anchor="n")
+        # Create frames
+        self.create_income_header()
+        self.create_input_section()
+        self.create_summary_section()
+        self.create_transaction_table()
+        self.create_navigation_buttons()
 
-        # Category
-        tk.Label(self.form_frame, text="Category:", font=("Comic Sans MS", 12), bg="#f1e7e7").grid(row=0, column=0, padx=10, pady=10, sticky="e")
-        self.category_dropdown = ttk.Combobox(self.form_frame, font=("Comic Sans MS", 12),
-                                              values=["Savings", "Vacation", "Emergency", "Education", "Food", "Rent", "Shopping"])
-        self.category_dropdown.set("Savings")
-        self.category_dropdown.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+    def create_income_header(self):
+        # Income header section
+        self.income_frame = tk.Frame(self, bg="#f5efef")
+        self.income_frame.grid(row=1, column=0, columnspan=4, pady=(0, 15), sticky="ew")
+        
+        self.budget_label = tk.Label(
+            self.income_frame, 
+            text="Budget",
+            font=("Comic Sans MS", 16, "bold"),
+            bg="#f5efef",
+            fg="#333333"
+        )
+        self.budget_label.grid(row=0, column=0, padx=(50, 20), sticky="w")
+        
+        # Replace paycheck button with dropdown
+        self.income_type = tk.StringVar(value="Paycheck")
+        self.income_dropdown = ttk.Combobox(
+            self.income_frame,
+            textvariable=self.income_type,
+            values=self.income_types,
+            font=("Comic Sans MS", 10),
+            width=12,
+            state="readonly"
+        )
+        self.income_dropdown.grid(row=0, column=1, padx=5)
 
-        # Amount
-        tk.Label(self.form_frame, text="Amount ($):", font=("Comic Sans MS", 12), bg="#f1e7e7").grid(row=1, column=0, padx=10, pady=10, sticky="e")
-        self.amount_entry = tk.Entry(self.form_frame, font=("Comic Sans MS", 12), bg="#ffffff", fg="black")
-        self.amount_entry.grid(row=1, column=1, padx=10, pady=10, sticky="w")
+        # Add these styles for the Combobox
+        style = ttk.Style()
+        style.map('TCombobox', fieldbackground=[('readonly', 'white')])
+        style.map('TCombobox', selectbackground=[('readonly', 'white')])
+        style.map('TCombobox', selectforeground=[('readonly', 'black')])
+        
+        self.income_button = tk.Button(
+            self.income_frame,
+            text="Income",
+            font=("Comic Sans MS", 10),
+            bg="#ffffff",
+            fg="#333333",
+            relief="ridge",
+            borderwidth=2
+        )
+        self.income_button.grid(row=0, column=2, padx=5)
+        
+        # Changed black background to white with black text
+        self.income_entry = tk.Entry(
+            self.income_frame, 
+            font=("Comic Sans MS", 10), 
+            width=10,
+            bg="#ffffff",
+            fg="#000000"
+        )
+        self.income_entry.insert(0, str(self.total_income))
+        self.income_entry.grid(row=0, column=3, padx=5)
+        
+        self.add_income_button = tk.Button(
+            self.income_frame,
+            text="Add",
+            font=("Comic Sans MS", 10),
+            bg="#ffffff",
+            fg="#333333",
+            relief="ridge",
+            borderwidth=2,
+            command=self.add_income
+        )
+        self.add_income_button.grid(row=0, column=4, padx=5)
 
-        # Type
-        tk.Label(self.form_frame, text="Type:", font=("Comic Sans MS", 12), bg="#f1e7e7").grid(row=2, column=0, padx=10, pady=10, sticky="e")
-        self.type_dropdown = ttk.Combobox(self.form_frame, font=("Comic Sans MS", 12), values=["Saving", "Expense"])
-        self.type_dropdown.set("Saving")
-        self.type_dropdown.grid(row=2, column=1, padx=10, pady=10, sticky="w")
+    def create_input_section(self):
+        # Left section - Expense input
+        self.input_frame = tk.Frame(self, bg="#ffdddd", padx=20, pady=20, relief="flat")
+        self.input_frame.grid(row=2, column=0, padx=30, pady=10, sticky="n")
+        
+        # Input section title
+        input_title = tk.Label(
+            self.input_frame, 
+            text="Enter your expenses here...",
+            font=("Comic Sans MS", 14),
+            bg="#ffdddd",
+            fg="#333333"
+        )
+        input_title.grid(row=0, column=0, columnspan=2, pady=10, sticky="w")
+        
+        # Name field
+        tk.Label(
+            self.input_frame, 
+            text="Name:",
+            font=("Comic Sans MS", 12),
+            bg="#ffdddd",
+            fg="#333333"
+        ).grid(row=1, column=0, pady=5, sticky="w")
+        
+        self.name_entry = tk.Entry(
+            self.input_frame, 
+            font=("Comic Sans MS", 12), 
+            width=25,
+            bg = "#ffffff",
+            fg="black"
+        )
+        self.name_entry.grid(row=1, column=1, pady=5, padx=5)
+        
+        # Category field
+        tk.Label(
+            self.input_frame,
+            text="Categories:",
+            font=("Comic Sans MS", 12),
+            bg="#ffdddd",
+            fg="#333333"
+        ).grid(row=2, column=0, pady=5, sticky="w")
+        
+        # Custom style for combobox
+        # For the category dropdown (in create_input_section method)
+        # Replace the existing style with this:
+        style = ttk.Style()
+        style.configure("TCombobox", fieldbackground="#ffffff", background="#ffffff")
+        style.map('TCombobox', fieldbackground=[('readonly', 'white')])
+        style.map('TCombobox', selectbackground=[('readonly', 'white')])
+        style.map('TCombobox', selectforeground=[('readonly', 'black')])
+        
+        self.category_dropdown = ttk.Combobox(
+            self.input_frame,
+            font=("Comic Sans MS", 12),
+            values=list(self.expense_categories.keys()),
+            width=22
+        )
+        self.category_dropdown.set("Living expenses")
+        self.category_dropdown.grid(row=2, column=1, pady=5, padx=5)
+        
+        # Amount field
+        tk.Label(
+            self.input_frame,
+            text="Amount:",
+            font=("Comic Sans MS", 12),
+            bg="#ffdddd",
+            fg="#333333"
+        ).grid(row=3, column=0, pady=5, sticky="w")
+        
+        self.amount_entry = tk.Entry(
+            self.input_frame, 
+            font=("Comic Sans MS", 12), 
+            width=25,
+            bg = "#ffffff",
+            fg="black"
+        )
+        self.amount_entry.grid(row=3, column=1, pady=5, padx=5)
+        
+        # Add button
+        self.add_button = tk.Button(
+            self.input_frame,
+            text="Add",
+            font=("Comic Sans MS", 11),
+            bg="#ffffff",
+            fg="#333333",
+            relief="ridge",
+            borderwidth=2,
+            command=self.add_transaction,
+            width=8
+        )
+        self.add_button.grid(row=4, column=1, pady=15, sticky="e")
 
-        # Add Button
-        tk.Button(self.form_frame, text="Add Transaction", font=("Comic Sans MS", 12), bg="#fffece",
-                  command=self.add_transaction).grid(row=3, column=0, columnspan=2, pady=15)
+    def create_summary_section(self):
+        # Right section - Summary
+        self.summary_frame = tk.Frame(
+            self, 
+            bg="#fff8e0", 
+            padx=20, 
+            pady=20, 
+            relief="ridge", 
+            bd=2
+        )
+        self.summary_frame.grid(row=2, column=1, padx=20, pady=10, sticky="n")
+        
+        # Total income
+        self.income_container = tk.Frame(self.summary_frame, bg="#fff8e0")
+        self.income_container.pack(fill="x", pady=2)
+        
+        tk.Label(
+            self.income_container,
+            text="⊙ Total income ...",
+            font=("Comic Sans MS", 12),
+            bg="#fff8e0",
+            fg="#333333",
+            anchor="w"
+        ).pack(side="left", padx=5)
+        
+        self.income_value = tk.Label(
+            self.income_container,
+            text=f"${self.total_income:.2f}",
+            font=("Comic Sans MS", 12),
+            bg="#fff8e0",
+            fg="#333333",
+            anchor="e"
+        )
+        self.income_value.pack(side="right", padx=5)
+        
+        # Create labels for each expense category
+        for category in self.expense_categories:
+            container = tk.Frame(self.summary_frame, bg="#fff8e0")
+            container.pack(fill="x", pady=2)
+            
+            tk.Label(
+                container,
+                text=f"⊙ {category} ...",
+                font=("Comic Sans MS", 12),
+                bg="#fff8e0",
+                fg="#333333",
+                anchor="w"
+            ).pack(side="left", padx=5)
+            
+            label = tk.Label(
+                container,
+                text="$0",
+                font=("Comic Sans MS", 12),
+                bg="#fff8e0",
+                fg="#333333",
+                anchor="e"
+            )
+            label.pack(side="right", padx=5)
+            self.expense_categories[category] = label
+        
+        # Separator
+        separator = tk.Frame(self.summary_frame, height=2, bg="#ffb3b3")
+        separator.pack(fill="x", pady=8)
+        
+        # Total expenses
+        self.total_container = tk.Frame(self.summary_frame, bg="#ffb3b3")
+        self.total_container.pack(fill="x", pady=2)
+        
+        tk.Label(
+            self.total_container,
+            text="Total expenses ...",
+            font=("Comic Sans MS", 14),
+            bg="#ffb3b3",
+            fg="#ffffff",
+            anchor="w"
+        ).pack(side="left", padx=5)
+        
+        self.total_value = tk.Label(
+            self.total_container,
+            text="$0",
+            font=("Comic Sans MS", 14),
+            bg="#ffb3b3",
+            fg="#ffffff",
+            anchor="e"
+        )
+        self.total_value.pack(side="right", padx=5)
 
-        # --------- Transaction Table (with scrollbar) ---------
-        self.table_frame = tk.Frame(self.canvas, bg="#f1e7e7")
-        self.canvas.create_window(400, 360, window=self.table_frame, anchor="n")
-
+    def create_transaction_table(self):
+        # Transaction table
+        self.table_frame = tk.Frame(self, bg="#f5efef")
+        self.table_frame.grid(row=3, column=0, columnspan=2, padx=30, pady=(30, 10), sticky="ew")
+        
+        # Table with header style
         columns = ("Category", "Amount", "Type")
-
-        self.tree_container = tk.Frame(self.table_frame, bg="#f1e7e7")
-        self.tree_container.pack()
-
+        
+        # Create a style for the treeview headers - Changed to white with black text
+        style = ttk.Style()
+        style.configure("Treeview.Heading", font=("Comic Sans MS", 11, "bold"), background="#ffffff", foreground="#000000")
+        style.configure("Treeview", font=("Comic Sans MS", 10), rowheight=25, background="#ffffff", fieldbackground="#ffffff", foreground="#000000")
+        
+        # Create a container for the table and scrollbar
+        self.tree_container = tk.Frame(self.table_frame, bg="#ffffff")
+        self.tree_container.pack(fill="both", expand=True)
+        
         self.transaction_table = ttk.Treeview(
             self.tree_container,
             columns=columns,
             show="headings",
             height=6
         )
-
-        # Scrollbar
+        
+        # For the scrollbar (in create_transaction_table method)
+        # Replace the existing scrollbar setup with this:
         scrollbar = ttk.Scrollbar(self.tree_container, orient="vertical", command=self.transaction_table.yview)
         self.transaction_table.configure(yscrollcommand=scrollbar.set)
 
-        self.transaction_table.pack(side="left")
-        scrollbar.pack(side="right", fill="y")
-
+        # Add this style configuration for the scrollbar
+        style = ttk.Style()
+        style.configure("Vertical.TScrollbar", background="white", arrowcolor="black", 
+                        troughcolor="white", bordercolor="white")
+        scrollbar.configure(style="Vertical.TScrollbar")
+        
+        # Set up columns
         for col in columns:
             self.transaction_table.heading(col, text=col)
             self.transaction_table.column(col, anchor="center", width=140)
-
-        # 💡 Right-click instruction label (outside table)
-        tip_label = tk.Label(self.table_frame,
+        
+        self.transaction_table.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Tip label for right-click
+        tip_label = tk.Label(
+            self,
             text="💡 Right-click a transaction row to edit or delete it.",
             font=("Comic Sans MS", 10),
-            bg="#f1e7e7",
-            fg="#444"
+            bg="#f5efef",
+            fg="#333333"
         )
-        tip_label.pack(pady=(5, 10))
-
-                
-
-        # --- Right-click menu ---
+        tip_label.grid(row=4, column=0, columnspan=2, pady=3)
+        
+        # Right-click menu
         self.context_menu = tk.Menu(self, tearoff=0)
         self.context_menu.add_command(label="Edit", command=self.edit_selected)
         self.context_menu.add_command(label="Delete", command=self.delete_selected)
-
-        # Bind right-click to Treeview
+        
+        # Bind right-click
         self.transaction_table.bind("<Button-3>", self.show_context_menu)
 
-
-        # --------- Back Button ---------
-        tk.Button(self.canvas, text="Back to Profile", font=("Comic Sans MS", 12), bg="#fffece",
-                  command=lambda: controller.show_frame("profile")).place(x=320, y=580)
+    def create_navigation_buttons(self):
+        # Navigation buttons
+        self.button_frame = tk.Frame(self, bg="#f5efef")
+        self.button_frame.grid(row=5, column=0, columnspan=2, pady=20)
         
-        # Done adding transactions button
-        tk.Button(self.canvas, text="Done", font=("Comic Sans MS", 12), bg="#d4fcd4",
-          command=self.finish_session).place(x=440, y=580)
+        tk.Button(
+            self.button_frame,
+            text="Back to Profile",
+            font=("Comic Sans MS", 12),
+            bg="#fffece",
+            fg="#333333",
+            relief="ridge",
+            borderwidth=2,
+            command=lambda: self.controller.show_frame("profile")
+        ).grid(row=0, column=0, padx=10)
+        
+        tk.Button(
+            self.button_frame,
+            text="Done",
+            font=("Comic Sans MS", 12),
+            bg="#d4fcd4",
+            fg="#333333",
+            relief="ridge",
+            borderwidth=2,
+            command=self.finish_session
+        ).grid(row=0, column=1, padx=10)
 
+    def update_income(self):
+        try:
+            self.total_income = float(self.income_entry.get())
+            self.income_value.config(text=f"${self.total_income:.2f}")
+            messagebox.showinfo("Success", f"Income updated to ${self.total_income:.2f}")
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Please enter a valid amount for income.")
 
-        # Resize handling
-        self.bind("<Configure>", self.on_resize)
-        self.update_idletasks()
-        self.on_resize(None)
-
-    def on_resize(self, event):
-        width = self.winfo_width()
-        height = self.winfo_height()
-        self.canvas.config(width=width, height=height)
-        if width > 1 and height > 1:
-            self.canvas.coords(self.title_text, width / 2, height * 0.08)
+    # New method to add income from the dropdown
+    def add_income(self):
+        try:
+            amount = float(self.income_entry.get())
+            income_type = self.income_type.get()
+            
+            # Add to total income
+            self.total_income += amount
+            self.income_value.config(text=f"${self.total_income:.2f}")
+            
+            # Add to transaction table
+            self.transaction_table.insert("", tk.END, values=(income_type, f"${amount:.2f}", "Income"))
+            
+            # Save to database
+            save_transaction(income_type, amount, "Income")
+            
+            # Clear income entry
+            self.income_entry.delete(0, tk.END)
+            
+            messagebox.showinfo("Success", f"Added ${amount:.2f} from {income_type}")
+            
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Please enter a valid amount for income.")
 
     def add_transaction(self):
+        name = self.name_entry.get()
         category = self.category_dropdown.get()
         amount_str = self.amount_entry.get()
-        trans_type = self.type_dropdown.get()
-
+        
+        if not name or not category or not amount_str:
+            messagebox.showerror("Missing Information", "Please fill in all fields.")
+            return
+            
         try:
             amount = float(amount_str)
         except ValueError:
             messagebox.showerror("Invalid Input", "Please enter a valid amount.")
             return
-
+        
+        # For compatibility with your existing code
+        trans_type = "Expense"
+        
         # Store in memory
         self.transactions.append({
+            "name": name,
             "category": category,
             "amount": amount,
             "type": trans_type
         })
-
-        # Save to database (for both Saving and Expense)
+        
+        # Save to database (using your existing function)
         save_transaction(category, amount, trans_type)
-        messagebox.showinfo("Success", f"Saved ${amount:.2f} to {category} as {trans_type}")
-
-
+        
         # Insert into table
         self.transaction_table.insert("", tk.END, values=(category, f"${amount:.2f}", trans_type))
-
+        
+        # Update summary
+        self.update_summary(category, amount)
+        
         # Reset inputs
+        self.name_entry.delete(0, tk.END)
         self.amount_entry.delete(0, tk.END)
-        self.category_dropdown.set("Savings")
-        self.type_dropdown.set("Saving")
+        self.category_dropdown.set("Living expenses")
+        
+        messagebox.showinfo("Success", f"Added ${amount:.2f} to {category}")
 
+    def update_summary(self, category, amount):
+        # Update category amount
+        if category in self.expense_categories:
+            current_text = self.expense_categories[category].cget("text")
+            current_amount = float(current_text.replace("$", ""))
+            new_amount = current_amount + amount
+            self.expense_categories[category].config(text=f"${new_amount:.2f}")
+            
+            # Update total
+            self.total_expenses += amount
+            self.total_value.config(text=f"${self.total_expenses:.2f}")
 
     def show_context_menu(self, event):
-    # Select the row under mouse before showing menu
+        # Select the row under mouse before showing menu
         item_id = self.transaction_table.identify_row(event.y)
         if item_id:
             self.transaction_table.selection_set(item_id)
             self.context_menu.post(event.x_root, event.y_root)
 
-
-    #deleting and editing transactions 
-
-    #deleting 
     def delete_selected(self):
         selected = self.transaction_table.selection()
         if not selected:
@@ -174,7 +482,7 @@ class TransactionFrame(tk.Frame):
         if not confirm:
             return
 
-        # Delete from DB
+        # Delete from DB (keeping your original code)
         from src.models.database import get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -185,15 +493,29 @@ class TransactionFrame(tk.Frame):
             WHERE category=? AND amount=? AND type=?
             LIMIT 1
         )
-    """, (category, amount, trans_type))
+        """, (category, amount, trans_type))
         conn.commit()
         conn.close()
+
+        # Update summary (subtract the amount)
+        if trans_type == "Expense" and category in self.expense_categories:
+            current_text = self.expense_categories[category].cget("text")
+            current_amount = float(current_text.replace("$", ""))
+            new_amount = current_amount - amount
+            self.expense_categories[category].config(text=f"${new_amount:.2f}")
+            
+            # Update total
+            self.total_expenses -= amount
+            self.total_value.config(text=f"${self.total_expenses:.2f}")
+        elif trans_type == "Income":
+            # Update total income
+            self.total_income -= amount
+            self.income_value.config(text=f"${self.total_income:.2f}")
 
         # Delete from table
         self.transaction_table.delete(selected[0])
         messagebox.showinfo("Deleted", "Transaction deleted.")
 
-    #edits transactions by deleting first and modifying 
     def edit_selected(self):
         selected = self.transaction_table.selection()
         if not selected:
@@ -203,14 +525,38 @@ class TransactionFrame(tk.Frame):
         item = self.transaction_table.item(selected[0])
         values = item['values']
         category, amount_text, trans_type = values
+        amount = float(amount_text.strip("$"))
 
-        # Pre-fill inputs
-        self.category_dropdown.set(category)
-        self.amount_entry.delete(0, tk.END)
-        self.amount_entry.insert(0, amount_text.strip("$"))
-        self.type_dropdown.set(trans_type)
+        # If it's an expense
+        if trans_type == "Expense":
+            # Update summary (subtract the amount first since we're editing)
+            if category in self.expense_categories:
+                current_text = self.expense_categories[category].cget("text")
+                current_amount = float(current_text.replace("$", ""))
+                new_amount = current_amount - amount
+                self.expense_categories[category].config(text=f"${new_amount:.2f}")
+                
+                # Update total
+                self.total_expenses -= amount
+                self.total_value.config(text=f"${self.total_expenses:.2f}")
 
-        # Remove original entry from table and DB (optional)
+            # Pre-fill inputs
+            self.category_dropdown.set(category)
+            self.amount_entry.delete(0, tk.END)
+            self.amount_entry.insert(0, amount_text.strip("$"))
+        # If it's income
+        elif trans_type == "Income":
+            # Update total income
+            self.total_income -= amount
+            self.income_value.config(text=f"${self.total_income:.2f}")
+            
+            # Pre-fill income inputs
+            if category in self.income_types:
+                self.income_type.set(category)
+            self.income_entry.delete(0, tk.END)
+            self.income_entry.insert(0, amount_text.strip("$"))
+
+        # Remove original entry from table and DB
         self.transaction_table.delete(selected[0])
 
         from src.models.database import get_db_connection
@@ -223,16 +569,12 @@ class TransactionFrame(tk.Frame):
             WHERE category=? AND amount=? AND type=?
             LIMIT 1
         )
-    """, (category, float(amount_text.strip("$")), trans_type))
+        """, (category, amount, trans_type))
         conn.commit()
         conn.close()
 
-        messagebox.showinfo("Edit Mode", "Now modify the inputs and click 'Add Transaction' to re-save.")
-
-
+        messagebox.showinfo("Edit Mode", f"Now modify the inputs and click 'Add' to re-save the {trans_type.lower()}.")
 
     def finish_session(self):
         messagebox.showinfo("Done", "All transactions saved!")
         self.controller.show_frame("profile")
-
-    

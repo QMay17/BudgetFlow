@@ -16,22 +16,21 @@ from src.ui.app_window import AppWindow
 from src.ui.login_frame import LoginFrame
 from src.ui.register_frame import RegisterFrame
 from src.ui.profile_frame import ProfileFrame
-from src.ui.budget_frame import BudgetFrame 
 from src.ui.report_frame import ReportFrame 
 from src.ui.transaction_frame import TransactionFrame
-from src.controllers.auth_controller import AuthController 
 from src.ui.savings_frame import SavingsFrame
+from src.controllers.auth_controller import AuthController 
 
 class BudgetFlowApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.auth_controller = AuthController(self)
-
+        
         # Configure the window
         self.title("BudgetFlow")
         self.geometry("800x600")
         self.minsize(800, 600)
-
+        
         # Create a container for all frames
         self.container = tk.Frame(self)
         self.container.grid(row=0, column=0, sticky="nsew")
@@ -39,25 +38,21 @@ class BudgetFlowApp(tk.Tk):
         self.grid_columnconfigure(0, weight=1)
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
-
-
-
+        
         # Dictionary to store frames
         self.frames = {}
-
+        
         # Initialize the frames
         self.setup_frames()
-
+        
         # Show the Welcome frame
         self.show_frame("welcome")
-        #self.show_frame("savings")
-        #self.show_frame("transaction") #(uncomment this to run transaction page)
-
+    
     def setup_frames(self):
         """Initialize all frames and add them to the frames dictionary"""
         # Welcome Frame
         app_window = AppWindow(self.container, self)
-        self.frames["welcome"]= app_window
+        self.frames["welcome"] = app_window
         app_window.grid(row=0, column=0, sticky="nsew")
         
         # Login Frame
@@ -69,22 +64,26 @@ class BudgetFlowApp(tk.Tk):
         register_frame = RegisterFrame(self.container, self)
         self.frames["register"] = register_frame
         register_frame.grid(row=0, column=0, sticky="nsew")
-
+        
         # Profile Frame
         profile_frame = ProfileFrame(self.container, self)
         self.frames["profile"] = profile_frame
         profile_frame.grid(row=0, column=0, sticky="nsew")
-
+        
         # Transaction Frame
         transaction_frame = TransactionFrame(self.container, self)
         self.frames["transaction"] = transaction_frame
         transaction_frame.grid(row=0, column=0, sticky="nsew")
-
-
-       # Savings Frame 
+        
+        # Savings Frame 
         savings_frame = SavingsFrame(self.container, self)
         self.frames["savings"] = savings_frame
         savings_frame.grid(row=0, column=0, sticky="nsew")
+        
+        # Report Frame (new)
+        report_frame = ReportFrame(self.container, self)
+        self.frames["report"] = report_frame
+        report_frame.grid(row=0, column=0, sticky="nsew")
     
     def show_frame(self, frame_name):
         """Show the frame with the given name"""
