@@ -1,6 +1,6 @@
 import sqlite3
-from pathlib import Path 
-import os 
+from pathlib import Path
+import os
 
 # Get the project root directory
 current_file = Path(__file__)
@@ -10,21 +10,34 @@ project_root = current_file.parent.parent.parent
 data_dir = project_root / "data"
 data_dir.mkdir(exist_ok=True)
 
-# Database path
-DB_Path = data_dir / "users.db"
+# Database paths
+USERS_DB = data_dir / "users.db"
+TRANSACTIONS_DB = data_dir / "transactions.db"
+SAVINGS_DB = data_dir / "savings.db"
 
-def get_db_connection():
-    """Create a connection to the SQLite database."""
-    conn = sqlite3.connect(DB_Path)
-    conn.row_factory = sqlite3.Row  # to access column by name
+def dict_factory(cursor, row):
+    return {col[0]: row[idx] for idx, col in enumerate(cursor.description)}
+
+# Connections
+def get_users_db_connection():
+    conn = sqlite3.connect(USERS_DB)
+    conn.row_factory = sqlite3.Row
     return conn
 
-def init_db():
-    """Initialize the database with necessary tables"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
+def get_transactions_db_connection():
+    conn = sqlite3.connect(TRANSACTIONS_DB)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-    # Create users table
+def get_savings_db_connection():
+    conn = sqlite3.connect(SAVINGS_DB)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# Initialization functions
+def init_users_db():
+    conn = get_users_db_connection()
+    cursor = conn.cursor()
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS users(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,8 +49,12 @@ def init_db():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')
+    conn.commit()
+    conn.close()
 
-    # Create transactions table
+def init_transactions_db():
+    conn = get_transactions_db_connection()
+    cursor = conn.cursor()
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS transactions(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,12 +63,16 @@ def init_db():
         amount REAL NOT NULL,
         type TEXT NOT NULL,
         description TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')
-    
-    # Create savings_goals table
+    conn.commit()
+    conn.close()
+
+#for savings goals 
+def init_savings_goals_db():
+    conn = get_savings_db_connection()
+    cursor = conn.cursor()
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS savings_goals(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,12 +81,38 @@ def init_db():
         target_amount REAL NOT NULL,
         deadline TEXT,
         description TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')
+    conn.commit()
+    conn.close()
+
+#for savings frame 
+def init_savings_transactions_db():
+    conn = get_savings_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS transactions(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            category TEXT NOT NULL,
+            amount REAL NOT NULL,
+            type TEXT NOT NULL,
+            description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    conn.commit()
+    conn.close()
+
     
-    # Create budget_categories table for predefined categories
+
+
+def init_budget_categories():
+    conn = get_users_db_connection()
+    cursor = conn.cursor()
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS budget_categories(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,8 +123,6 @@ def init_db():
         icon TEXT
     )
     ''')
-    
-    # Insert default categories if none exist
     if cursor.execute("SELECT COUNT(*) FROM budget_categories").fetchone()[0] == 0:
         default_categories = [
             ("Savings", "saving", "General savings", "#76c7c0", "💰"),
@@ -92,16 +137,20 @@ def init_db():
             ("Personal", "expense", "Personal care", "#e7ceff", "💇"),
             ("Recreation", "expense", "Entertainment and hobbies", "#fcf7bb", "🎮")
         ]
-        
         cursor.executemany(
             "INSERT INTO budget_categories (name, type, description, color, icon) VALUES (?, ?, ?, ?, ?)",
             default_categories
         )
-    
     conn.commit()
     conn.close()
 
-    print(f"Database initialized at {DB_Path}")
+def initialize_all_databases():
+    init_users_db()
+    init_transactions_db()
+    init_savings_goals_db()
+    init_savings_transactions_db()
+    init_budget_categories()
+    print("All databases initialized.")
 
-# Initialize the database when this module is imported
-init_db()
+# Initialize all
+initialize_all_databases()

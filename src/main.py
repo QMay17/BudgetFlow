@@ -19,6 +19,7 @@ from src.ui.profile_frame import ProfileFrame
 from src.ui.report_frame import ReportFrame 
 from src.ui.transaction_frame import TransactionFrame
 from src.ui.savings_frame import SavingsFrame
+from src.ui.savings_goal_frame import SavingsGoalFrame
 from src.controllers.auth_controller import AuthController 
 
 class BudgetFlowApp(tk.Tk):
@@ -29,8 +30,8 @@ class BudgetFlowApp(tk.Tk):
         # Configure the window
         self.title("BudgetFlow")
         self.geometry("800x600")
-        self.minsize(800, 600)
-        
+        self.minsize(800, 600) 
+           
         # Create a container for all frames
         self.container = tk.Frame(self)
         self.container.grid(row=0, column=0, sticky="nsew")
@@ -53,7 +54,7 @@ class BudgetFlowApp(tk.Tk):
         # Welcome Frame
         app_window = AppWindow(self.container, self)
         self.frames["welcome"] = app_window
-        app_window.grid(row=0, column=0, sticky="nsew")
+        app_window.grid(row=3, column=3, sticky="nsew")
         
         # Login Frame
         login_frame = LoginFrame(self.container, self)
@@ -75,10 +76,15 @@ class BudgetFlowApp(tk.Tk):
         self.frames["transaction"] = transaction_frame
         transaction_frame.grid(row=0, column=0, sticky="nsew")
         
-        # Savings Frame 
+        # Savings Frame (just for transactions)
         savings_frame = SavingsFrame(self.container, self)
         self.frames["savings"] = savings_frame
         savings_frame.grid(row=0, column=0, sticky="nsew")
+
+        # Savings Goal Frame 
+        savings_goal_frame = SavingsGoalFrame(self.container, self)
+        self.frames["savings_goal"] = savings_goal_frame
+        savings_goal_frame.grid(row=0, column=0, sticky="nsew")
         
         # Report Frame (new)
         report_frame = ReportFrame(self.container, self)
@@ -92,4 +98,12 @@ class BudgetFlowApp(tk.Tk):
 
 if __name__ == "__main__":
     app = BudgetFlowApp()
+
+    def report_size():
+        width = app.winfo_width()
+        height = app.winfo_height()
+        print(f"[DEBUG] App window size: {width} x {height}")
+        app.after(2000, report_size)  # Repeats every 2 seconds
+
+    app.after(500, report_size)  # Start measuring after window initializes
     app.mainloop()

@@ -3,7 +3,8 @@ import hashlib
 import os 
 from pathlib import Path 
 from datetime import datetime 
-from .database import get_db_connection
+from .database import get_users_db_connection as get_db_connection
+
 
 class User:
     def __init__(self, id=None, username=None, email=None, full_name=None, password_hash=None, created_at=None):

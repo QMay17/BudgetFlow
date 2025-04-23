@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from src.models.transaction import save_transaction
+from src.models.database import get_transactions_db_connection as get_db_connection
+
 
 
 class TransactionFrame(tk.Frame):
@@ -27,7 +29,7 @@ class TransactionFrame(tk.Frame):
         # Title text
         self.title_label = tk.Label(
             self,
-            text="Budget Tracker",
+            text="Expense Tracker",
             font=("Comic Sans MS", 20, "bold"),
             bg="#f5efef",
             fg="#333333"
@@ -483,7 +485,6 @@ class TransactionFrame(tk.Frame):
             return
 
         # Delete from DB (keeping your original code)
-        from src.models.database import get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
@@ -559,7 +560,6 @@ class TransactionFrame(tk.Frame):
         # Remove original entry from table and DB
         self.transaction_table.delete(selected[0])
 
-        from src.models.database import get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""

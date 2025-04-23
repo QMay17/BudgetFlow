@@ -1,3 +1,4 @@
+
 import tkinter as tk
 from tkinter import ttk
 from pathlib import Path
@@ -24,7 +25,7 @@ class AppWindow(tk.Frame):
         
         self.canvas.create_text(
             400, 240, 
-            text="BudgetFlow", 
+            text="BgetFlow", 
             font=("Comic Sans MS", 36, "bold"), 
             fill="#333333"
         )
@@ -98,4 +99,3 @@ class AppWindow(tk.Frame):
         self.canvas.coords(self.canvas.find_withtag("all")[5], center_x, center_y + 80)  # Login button
         self.canvas.coords(self.canvas.find_withtag("all")[6], center_x, center_y + 145)  # Register button
     
-        

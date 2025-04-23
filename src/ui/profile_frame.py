@@ -131,17 +131,28 @@ class ProfileFrame(tk.Frame):
         # Transaction Button (Report Finances)
         transaction_button = tk.Button(
             finance_button_frame,
-            text="Report Finances",
+            text="Report Expenses",
             command=lambda: controller.show_frame("transaction"),
             **button_style
         )
         transaction_button.pack(pady=10)
+
+        #Report savings transactions buttons 
+        report_savings_button = tk.Button(
+            finance_button_frame,
+            text="Report Savings",
+            command=lambda: controller.show_frame("savings"),
+            **button_style
+        )
+        report_savings_button.pack(pady=10)
+
+
         
         # Savings Goals Button
         savings_button = tk.Button(
             finance_button_frame,
             text="Saving Goals",
-            command=lambda: controller.show_frame("savings"),
+            command=lambda: controller.show_frame("savings_goal"),
             **button_style
         )
         savings_button.pack(pady=10)

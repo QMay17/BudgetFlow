@@ -4,7 +4,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime, timedelta
-from src.models.transaction import load_all_transactions
+from src.models.savings import load_all_savings
 
 class ReportFrame(tk.Frame):
     def __init__(self, parent, controller):
@@ -25,7 +25,8 @@ class ReportFrame(tk.Frame):
         
         # Create notebook (tabbed interface) for different reports
         self.notebook = ttk.Notebook(self)
-        self.canvas.create_window(400, 300, window=self.notebook, width=700, height=450)
+        self.canvas.create_window(400, 300, window=self.notebook, width=700, height=450, tags="window")
+
         
         # Create tabs for different types of reports
         self.savings_tab = tk.Frame(self.notebook, bg="#f1e7e7")
@@ -67,8 +68,11 @@ class ReportFrame(tk.Frame):
             # Reposition title text
             self.canvas.coords(self.title_text, width/2, 50)
             
-            # Resize notebook
-            self.canvas.coords(self.canvas.find_withtag("window")[0], width/2, height/2)
+            # FIXED: Avoid crashing if the window tag is not yet placed
+        items = self.canvas.find_withtag("window")
+        if items:
+            self.canvas.coords(items[0], width / 2, height / 2)
+    
     
     def setup_savings_tab(self):
         """Set up the Savings Goals tab"""
@@ -81,8 +85,8 @@ class ReportFrame(tk.Frame):
         ).pack(pady=10)
         
         # Get savings goals data
-        transactions = load_all_transactions()
-        saving_transactions = [tx for tx in transactions if tx['type'].lower() == 'saving']
+        saving_transactions = load_all_savings()
+
         
         if not saving_transactions:
             tk.Label(
@@ -134,7 +138,7 @@ class ReportFrame(tk.Frame):
         ).pack(pady=10)
         
         # Get transaction data
-        transactions = load_all_transactions()
+        transactions = load_all_savings()
         expense_transactions = [tx for tx in transactions if tx['type'].lower() == 'expense']
         
         if not expense_transactions:
@@ -198,7 +202,7 @@ class ReportFrame(tk.Frame):
         ).pack(pady=10)
         
         # Get transaction data
-        transactions = load_all_transactions()
+        transactions = load_all_savings()
         expense_transactions = [tx for tx in transactions if tx['type'].lower() == 'expense']
         
         if not expense_transactions:
