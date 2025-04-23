@@ -1,4 +1,4 @@
-from .database import get_db_connection
+from .database import get_transactions_db_connection as get_db_connection
 from datetime import datetime
 
 def save_transaction(category, amount, trans_type, description=None, user_id=None):

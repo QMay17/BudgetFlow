@@ -1,6 +1,7 @@
-from .database import get_db_connection, dict_factory
+from .database import get_transactions_db_connection as get_db_connection, dict_factory
 from datetime import datetime
 from .transaction import load_transactions_by_category
+
 
 def create_savings_goal(user_id, name, category, target_amount, deadline=None):
     """
