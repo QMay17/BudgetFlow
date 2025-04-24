@@ -81,11 +81,12 @@ class RegisterFrame(tk.Frame):
         self.register_frame.place(relx=0.5, rely=0.5, anchor="center", width=400, height=400)
         
         # Bind resize event
-        self.bind("<Configure>", self.on_resize)
+        #self.bind("<Configure>", self.on_resize)
         
-        # Initial resize to set positions
-        self.update_idletasks()
-        self.on_resize(None)
+    
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
     def on_resize(self, event):
         """Handle window resize event"""
@@ -129,5 +130,16 @@ class RegisterFrame(tk.Frame):
             messagebox.showwarning("Weak Password", "Password should be at least 6 characters.")
             return
 
-        print("Registration Data Validated:", user_data)
-        messagebox.showinfo("Success", "Registration validated!")
+        # Call AuthController to handle registration
+        success = self.controller.auth_controller.handle_registration(
+            user_data["Username"],
+            user_data["Email"],
+            user_data["Full Name"],
+            user_data["Password"],
+            user_data["Confirm Password"]
+        )
+
+        if success:
+            print(" Registration successful !")
+        else:
+            print("Registration failed")

@@ -29,7 +29,8 @@ class SavingsFrame(tk.Frame):
 
         # Goal inputs
         tk.Label(self.form_frame, text="What do you want to save for?", font=("Comic Sans MS", 12), bg="white").pack(pady=10)
-        self.goal_dropdown = ttk.Combobox(self.form_frame, values=["Vacation", "Emergency", "Education", "Food", "Rent", "Shopping"])
+        self.goal_dropdown = ttk.Combobox(self.form_frame, values=["Living", "Transportation", "Healthcare", "Groceries", "Personal spending", "Recreation"])
+
         self.goal_dropdown.set("Vacation")
         self.goal_dropdown.pack()
 

@@ -60,15 +60,13 @@ class ReportFrame(tk.Frame):
         width = self.winfo_width()
         height = self.winfo_height()
         
-        if width > 1 and height > 1:
-            # Update canvas size
-            self.canvas.config(width=width, height=height)
-            
-            # Reposition title text
-            self.canvas.coords(self.title_text, width/2, 50)
-            
-            # Resize notebook
-            self.canvas.coords(self.canvas.find_withtag("window")[0], width/2, height/2)
+        self.canvas.config(width=width, height=height)
+        self.canvas.coords(self.title_text, width / 2, 50)
+
+        # Fix: safely check before accessing index 0
+        items = self.canvas.find_withtag("window")
+        if items:
+            self.canvas.coords(items[0], width / 2, height / 2)
     
     def setup_savings_tab(self):
         """Set up the Savings Goals tab"""

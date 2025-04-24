@@ -46,7 +46,9 @@ class BudgetFlowApp(tk.Tk):
         self.setup_frames()
         
         # Show the Welcome frame
-        self.show_frame("welcome")
+        #self.show_frame("welcome")
+        self.show_frame("transaction")
+
     
     def setup_frames(self):
         """Initialize all frames and add them to the frames dictionary"""
@@ -89,6 +91,10 @@ class BudgetFlowApp(tk.Tk):
         """Show the frame with the given name"""
         frame = self.frames[frame_name]
         frame.tkraise()  # Bring the frame to the top
+
+    
+
+
 
 if __name__ == "__main__":
     app = BudgetFlowApp()

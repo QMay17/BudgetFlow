@@ -9,6 +9,7 @@ class AuthManager:
     
     def register_user(self, username, email, full_name, password, confirm_password):
         """Register a new user."""
+
         # Input validation
         if not username or not email or not full_name or not password:
             return False, "All fields are required"
@@ -31,6 +32,7 @@ class AuthManager:
         try:
             # Create new user
             user = User.create(username, email, full_name, password)
+            print(f"[DEBUG] User successfully registered: {user}")
             self.current_user = user
             return True, "Registration successful"
         except ValueError as e:
@@ -40,21 +42,17 @@ class AuthManager:
     
     def login(self, username, password):
         """Login a user with username and password."""
-        if not username or not password:
-            return False, "Username and password are required"
-        
-        # Find user by username
+
         user = User.find_by_username(username)
         if not user:
             return False, "Invalid username or password"
         
-        # Verify password
         if not User.verify_password(user.password_hash, password):
             return False, "Invalid username or password"
-        
-        # Set current user
+
         self.current_user = user
         return True, "Login successful"
+
     
     def logout(self):
         """Log out the current user."""
