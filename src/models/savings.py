@@ -1,6 +1,7 @@
-from .database import get_db_connection, dict_factory
+from .database import get_transactions_db_connection as get_db_connection, dict_factory
 from datetime import datetime
 from .transaction import load_transactions_by_category
+
 
 def create_savings_goal(user_id, name, category, target_amount, deadline=None):
     """
@@ -109,4 +110,34 @@ def update_savings_goal(goal_id, name=None, category=None, target_amount=None, d
     Returns:
         bool: True if successful, False otherwise
     """
-    conn = get_db_
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Get the current goal data
+        current = cursor.execute("SELECT * FROM savings_goals WHERE id = ?", (goal_id,)).fetchone()
+        
+        if not current:
+            return False
+        
+        # Update only the fields that were provided
+        new_name = name if name is not None else current['name']
+        new_category = category if category is not None else current['category']
+        new_target = target_amount if target_amount is not None else current['target_amount']
+        new_deadline = deadline if deadline is not None else current['deadline']
+        
+        cursor.execute(
+            "UPDATE savings_goals SET name = ?, category = ?, target_amount = ?, deadline = ? WHERE id = ?",
+            (new_name, new_category, new_target, new_deadline, goal_id)
+        )
+        
+        conn.commit()
+        return cursor.rowcount > 0
+    
+    except Exception as e:
+        print(f"Error updating savings goal: {e}")
+        conn.rollback()
+        return False
+    
+    finally:
+        conn.close()

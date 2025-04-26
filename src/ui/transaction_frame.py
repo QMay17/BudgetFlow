@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from src.models.transaction import save_transaction
+from src.models.transaction import (
+    save_transaction, 
+    load_all_transactions
+)
 
 
 class TransactionFrame(tk.Frame):
@@ -11,15 +14,26 @@ class TransactionFrame(tk.Frame):
         self.transactions = []  # to store all transactions
         self.total_expenses = 0
         self.expense_categories = {
-            "Living expenses": 0,
+            "Living": 0,
             "Transportation": 0,
             "Healthcare": 0,
             "Groceries": 0,
             "Personal spending": 0,
             "Recreation": 0
         }
-        self.total_income = 4000  # Default income value
+        self.savings = []  # to store all transactions
+        self.total_savings = 0
+        self.saving_categories = {
+            "Vacation": 0,
+            "Emergency": 0,
+            "Education": 0,
+            "Car": 0,
+            "House": 0,
+            "Shopping": 0
+        }
+        self.total_income = 0  # Default income value
         self.income_types = ["Paycheck", "Investment", "Scholarships", "Bonuses", "Others"]
+        self.saving_labels = {}  # Initialize the labels dictionary
 
         # Main background
         self.configure(bg="#f5efef")
@@ -37,9 +51,68 @@ class TransactionFrame(tk.Frame):
         # Create frames
         self.create_income_header()
         self.create_input_section()
-        self.create_summary_section()
+        self.create_summary_section() #for expenses 
+        self.create_savings_summary_section() #for savings 
         self.create_transaction_table()
         self.create_navigation_buttons()
+
+        self.load_transaction_data()
+
+    def load_transaction_data(self):
+        """Load transaction data from the database and update the UI"""
+        user_id = None
+        if hasattr(self, 'user') and self.user:
+            user_id = self.user.id
+        
+        # Clear existing transactions from the table
+        for item in self.transaction_table.get_children():
+            self.transaction_table.delete(item)
+        
+        # Reset summary values
+        self.total_expenses = 0
+        self.total_savings = 0
+        for category in self.expense_categories:
+            self.expense_categories[category].config(text="$0.00")
+        for category in self.saving_labels:
+            self.saving_labels[category].config(text="$0.00")
+        
+        # Load transactions from database
+        transactions = load_all_transactions(user_id)
+        if not transactions:
+            return
+        
+        # Process each transaction
+        for transaction in transactions:
+            category = transaction['category']
+            amount = transaction['amount']
+            trans_type = transaction['type']
+            
+            # Add to table
+            self.transaction_table.insert("", tk.END, values=(category, f"${amount:.2f}", trans_type))
+            
+            # Update the appropriate summary
+            if trans_type == "Expense":
+                if category in self.expense_categories:
+                    current_text = self.expense_categories[category].cget("text")
+                    current_amount = float(current_text.replace("$", "")) if current_text != "$0.00" else 0
+                    new_amount = current_amount + amount
+                    self.expense_categories[category].config(text=f"${new_amount:.2f}")
+                    self.total_expenses += amount
+            elif trans_type == "Saving":
+                if category in self.saving_labels:
+                    current_text = self.saving_labels[category].cget("text")
+                    current_amount = float(current_text.replace("$", "")) if current_text != "$0.00" else 0
+                    new_amount = current_amount + amount
+                    self.saving_labels[category].config(text=f"${new_amount:.2f}")
+                    self.total_savings += amount
+            elif trans_type == "Income":
+                self.total_income += amount
+        
+        # Update totals
+        self.total_value.config(text=f"${self.total_expenses:.2f}")
+        self.savings_total_value.config(text=f"${self.total_savings:.2f}")
+        self.income_value.config(text=f"${self.total_income:.2f}")
+        self.savings_income_value.config(text=f"${self.total_income:.2f}")
 
     def create_income_header(self):
         # Income header section
@@ -115,7 +188,7 @@ class TransactionFrame(tk.Frame):
         # Input section title
         input_title = tk.Label(
             self.input_frame, 
-            text="Enter your expenses here...",
+            text="Enter your transactions here...",
             font=("Comic Sans MS", 14),
             bg="#ffdddd",
             fg="#333333"
@@ -164,7 +237,7 @@ class TransactionFrame(tk.Frame):
             values=list(self.expense_categories.keys()),
             width=22
         )
-        self.category_dropdown.set("Living expenses")
+        self.category_dropdown.set("Living")
         self.category_dropdown.grid(row=2, column=1, pady=5, padx=5)
         
         # Amount field
@@ -184,7 +257,29 @@ class TransactionFrame(tk.Frame):
             fg="black"
         )
         self.amount_entry.grid(row=3, column=1, pady=5, padx=5)
-        
+
+        # Type dropdown (Expense or Saving)
+        tk.Label(
+            self.input_frame,
+            text="Type:",
+            font=("Comic Sans MS", 12),
+            bg="#ffdddd",
+            fg="#333333"
+        ).grid(row=4, column=0, pady=5, sticky="w")
+
+        self.type_var = tk.StringVar(value="Expense")  # default to Expense
+        self.type_dropdown = ttk.Combobox(
+            self.input_frame,
+            textvariable=self.type_var,
+            values=["Expense", "Saving"],
+            font=("Comic Sans MS", 12),
+            width=22,
+            state="readonly"
+        )
+
+        self.type_dropdown.grid(row=4, column=1, pady=5, padx=5)
+        self.type_dropdown.bind("<<ComboboxSelected>>", self.update_category_dropdown)
+
         # Add button
         self.add_button = tk.Button(
             self.input_frame,
@@ -197,7 +292,16 @@ class TransactionFrame(tk.Frame):
             command=self.add_transaction,
             width=8
         )
-        self.add_button.grid(row=4, column=1, pady=15, sticky="e")
+        self.add_button.grid(row=5, column=1, pady=15, sticky="e")
+
+    def update_category_dropdown(self, event=None):
+        selected_type = self.type_var.get()
+        if selected_type == "Expense":
+            self.category_dropdown['values'] = list(self.expense_categories.keys())
+            self.category_dropdown.set("Living")
+        elif selected_type == "Saving":
+            self.category_dropdown['values'] = list(self.saving_categories.keys())
+            self.category_dropdown.set("Vacation")
 
     def create_summary_section(self):
         # Right section - Summary
@@ -285,6 +389,99 @@ class TransactionFrame(tk.Frame):
             anchor="e"
         )
         self.total_value.pack(side="right", padx=5)
+
+
+    #for savings 
+    def create_savings_summary_section(self):
+        # Right section - Savings Summary
+        self.savings_summary_frame = tk.Frame(
+            self,
+            bg="#fff8e0",
+            padx=20,
+            pady=20,
+            relief="ridge",
+            bd=2
+        )
+        self.savings_summary_frame.grid(row=2, column=2, padx=20, pady=10, sticky="n")
+
+        # ⊙ Total income
+        self.savings_income_container = tk.Frame(self.savings_summary_frame, bg="#fff8e0")
+        self.savings_income_container.pack(fill="x", pady=2)
+
+        tk.Label(
+            self.savings_income_container,
+            text="⊙ Total income ...",
+            font=("Comic Sans MS", 12),
+            bg="#fff8e0",
+            fg="#333333",
+            anchor="w"
+        ).pack(side="left", padx=5)
+
+        self.savings_income_value = tk.Label(
+            self.savings_income_container,
+            text=f"${self.total_income:.2f}",
+            font=("Comic Sans MS", 12),
+            bg="#fff8e0",
+            fg="#333333",
+            anchor="e"
+        )
+        self.savings_income_value.pack(side="right", padx=5)
+
+        self.saving_labels = {} # To initialize the dictionary
+
+        for category in self.saving_categories:
+            container = tk.Frame(self.savings_summary_frame, bg="#fff8e0")
+            container.pack(fill="x", pady=2)
+
+            tk.Label(
+                container,
+                text=f"⊙ {category} ...",
+                font=("Comic Sans MS", 12),
+                bg="#fff8e0",
+                fg="#333333",
+                anchor="w"
+            ).pack(side="left", padx=5)
+
+            label = tk.Label(
+                container,
+                text="$0",
+                font=("Comic Sans MS", 12),
+                bg="#fff8e0",
+                fg="#333333",
+                anchor="e"
+            )
+            label.pack(side="right", padx=5)
+            self.saving_labels[category] = label
+
+        # Separator
+        separator = tk.Frame(self.savings_summary_frame, height=2, bg="#b3ffb3")
+        separator.pack(fill="x", pady=8)
+
+        # Total Savings
+        self.total_savings = 0
+        self.savings_total_container = tk.Frame(self.savings_summary_frame, bg="#b3ffb3")
+        self.savings_total_container.pack(fill="x", pady=2)
+
+        tk.Label(
+            self.savings_total_container,
+            text="Total savings ...",
+            font=("Comic Sans MS", 14),
+            bg="#ffb3b3",
+            fg="#ffffff",
+            anchor="w"
+        ).pack(side="left", padx=5)
+
+        self.savings_total_value = tk.Label(
+            self.savings_total_container,
+            text="$0",
+            font=("Comic Sans MS", 14),
+            bg="#b3ffb3",
+            fg="#ffffff",
+            anchor="e"
+        )
+
+        self.saving_labels[category] = label
+        self.savings_total_value.pack(side="right", padx=5)
 
     def create_transaction_table(self):
         # Transaction table
@@ -374,10 +571,13 @@ class TransactionFrame(tk.Frame):
             command=self.finish_session
         ).grid(row=0, column=1, padx=10)
 
+
     def update_income(self):
         try:
             self.total_income = float(self.income_entry.get())
-            self.income_value.config(text=f"${self.total_income:.2f}")
+            self.income_value.config(text=f"${self.total_income:.2f}") #updates in expenses panel
+            self.savings_income_value.config(text=f"${self.total_income:.2f}") # update sins savings panel
+            
             messagebox.showinfo("Success", f"Income updated to ${self.total_income:.2f}")
         except ValueError:
             messagebox.showerror("Invalid Input", "Please enter a valid amount for income.")
@@ -391,6 +591,7 @@ class TransactionFrame(tk.Frame):
             # Add to total income
             self.total_income += amount
             self.income_value.config(text=f"${self.total_income:.2f}")
+            self.savings_income_value.config(text=f"${self.total_income:.2f}")#added
             
             # Add to transaction table
             self.transaction_table.insert("", tk.END, values=(income_type, f"${amount:.2f}", "Income"))
@@ -422,7 +623,7 @@ class TransactionFrame(tk.Frame):
             return
         
         # For compatibility with your existing code
-        trans_type = "Expense"
+        trans_type = self.type_var.get()
         
         # Store in memory
         self.transactions.append({
@@ -433,33 +634,42 @@ class TransactionFrame(tk.Frame):
         })
         
         # Save to database (using your existing function)
-        save_transaction(category, amount, trans_type)
+        save_transaction(category, amount, trans_type, name=name)
         
         # Insert into table
         self.transaction_table.insert("", tk.END, values=(category, f"${amount:.2f}", trans_type))
         
         # Update summary
-        self.update_summary(category, amount)
+        self.update_summary(category, amount, trans_type)
         
         # Reset inputs
         self.name_entry.delete(0, tk.END)
         self.amount_entry.delete(0, tk.END)
-        self.category_dropdown.set("Living expenses")
+        self.update_category_dropdown() 
         
         messagebox.showinfo("Success", f"Added ${amount:.2f} to {category}")
 
-    def update_summary(self, category, amount):
+    def update_summary(self, category, amount, trans_type="Expense"):
         # Update category amount
-        if category in self.expense_categories:
-            current_text = self.expense_categories[category].cget("text")
-            current_amount = float(current_text.replace("$", ""))
-            new_amount = current_amount + amount
-            self.expense_categories[category].config(text=f"${new_amount:.2f}")
-            
-            # Update total
-            self.total_expenses += amount
-            self.total_value.config(text=f"${self.total_expenses:.2f}")
-
+        if trans_type == "Expense":
+            if category in self.expense_categories:
+                current_text = self.expense_categories[category].cget("text")
+                current_amount = float(current_text.replace("$", ""))
+                new_amount = current_amount + amount
+                self.expense_categories[category].config(text=f"${new_amount:.2f}")
+                # Update total
+                self.total_expenses += amount
+                self.total_value.config(text=f"${self.total_expenses:.2f}")
+        elif trans_type == "Saving":
+            if category in self.saving_labels:
+                current_text = self.saving_labels[category].cget("text")
+                current_amount = float(current_text.replace("$", ""))
+                new_amount = current_amount + amount
+                self.saving_labels[category].config(text=f"${new_amount:.2f}")
+                #update total
+                self.total_savings += amount
+                self.savings_total_value.config(text=f"${self.total_savings:.2f}")
+    
     def show_context_menu(self, event):
         # Select the row under mouse before showing menu
         item_id = self.transaction_table.identify_row(event.y)
@@ -483,7 +693,7 @@ class TransactionFrame(tk.Frame):
             return
 
         # Delete from DB (keeping your original code)
-        from src.models.database import get_db_connection
+        from src.models.database import get_transactions_db_connection as get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
@@ -508,9 +718,19 @@ class TransactionFrame(tk.Frame):
             self.total_expenses -= amount
             self.total_value.config(text=f"${self.total_expenses:.2f}")
         elif trans_type == "Income":
-            # Update total income
+            # Update total income in BOTH panels
             self.total_income -= amount
             self.income_value.config(text=f"${self.total_income:.2f}")
+            self.savings_income_value.config(text=f"${self.total_income:.2f}")
+
+        elif trans_type == "Saving" and category in self.saving_labels:
+            current_text = self.saving_labels[category].cget("text")
+            current_amount = float(current_text.replace("$", ""))
+            new_amount = current_amount - amount
+            self.saving_labels[category].config(text=f"${new_amount:.2f}")
+            self.total_savings -= amount
+            self.savings_total_value.config(text=f"${self.total_savings:.2f}")
+
 
         # Delete from table
         self.transaction_table.delete(selected[0])
@@ -527,39 +747,46 @@ class TransactionFrame(tk.Frame):
         category, amount_text, trans_type = values
         amount = float(amount_text.strip("$"))
 
-        # If it's an expense
+        # Remove original entry from table (always)
+        self.transaction_table.delete(selected[0])
+
+        # Subtract from the appropriate summary
         if trans_type == "Expense":
-            # Update summary (subtract the amount first since we're editing)
             if category in self.expense_categories:
                 current_text = self.expense_categories[category].cget("text")
                 current_amount = float(current_text.replace("$", ""))
                 new_amount = current_amount - amount
                 self.expense_categories[category].config(text=f"${new_amount:.2f}")
-                
-                # Update total
                 self.total_expenses -= amount
                 self.total_value.config(text=f"${self.total_expenses:.2f}")
 
-            # Pre-fill inputs
-            self.category_dropdown.set(category)
-            self.amount_entry.delete(0, tk.END)
-            self.amount_entry.insert(0, amount_text.strip("$"))
-        # If it's income
+            self.type_var.set("Expense")  # Set dropdown
         elif trans_type == "Income":
-            # Update total income
             self.total_income -= amount
             self.income_value.config(text=f"${self.total_income:.2f}")
-            
-            # Pre-fill income inputs
             if category in self.income_types:
                 self.income_type.set(category)
             self.income_entry.delete(0, tk.END)
             self.income_entry.insert(0, amount_text.strip("$"))
+            self.type_var.set("Income")
+        elif trans_type == "Saving":
+            if category in self.saving_labels:
+                current_text = self.saving_labels[category].cget("text")
+                current_amount = float(current_text.replace("$", ""))
+                new_amount = current_amount - amount
+                self.saving_labels[category].config(text=f"${new_amount:.2f}")
+                
+                self.total_savings -= amount
+                self.savings_total_value.config(text=f"${self.total_savings:.2f}")
+            self.type_var.set("Saving")
 
-        # Remove original entry from table and DB
-        self.transaction_table.delete(selected[0])
+        # Pre-fill shared input fields
+        self.category_dropdown.set(category)
+        self.amount_entry.delete(0, tk.END)
+        self.amount_entry.insert(0, amount_text.strip("$"))
 
-        from src.models.database import get_db_connection
+        # Remove from database
+        from src.models.database import get_transactions_db_connection as get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""

@@ -1,4 +1,4 @@
-from .database import get_db_connection
+from .database import get_transactions_db_connection as get_db_connection
 from datetime import datetime
 
 def save_transaction(category, amount, trans_type, description=None, user_id=None):
@@ -6,6 +6,7 @@ def save_transaction(category, amount, trans_type, description=None, user_id=Non
     Save a transaction to the database
     
     Args:
+        name: Transaction name
         category (str): Transaction category
         amount (float): Transaction amount
         trans_type (str): Transaction type (e.g., 'Saving', 'Expense')
@@ -24,13 +25,14 @@ def save_transaction(category, amount, trans_type, description=None, user_id=Non
             # For simplicity, use user_id=1 if not logged in
             user_id = 1
         
-        cursor.execute(
-            "INSERT INTO transactions (user_id, category, amount, type, description, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-            (user_id, category, amount, trans_type, description, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        )
+        cursor.execute("""
+        INSERT INTO transactions (category, amount, type, name)
+        VALUES (?, ?, ?, ?)
+        """, (category, amount, type_name, name))
         
         transaction_id = cursor.lastrowid
         conn.commit()
+        print(f"[DEBUG] ✅ Transaction saved → {trans_type} | {category} | ${amount:.2f} | user_id={user_id}")
         return transaction_id
     
     except Exception as e:
