@@ -58,7 +58,7 @@ class SavingsFrame(tk.Frame):
             font=("Comic Sans MS", 12),
             bg="#ffdddd",
             fg="#333333",
-            width=15,
+            width=20,
             anchor="w"
         ).pack(side="left")
         
@@ -88,7 +88,7 @@ class SavingsFrame(tk.Frame):
             font=("Comic Sans MS", 12),
             bg="#ffdddd",
             fg="#333333",
-            width=15,
+            width=20,
             anchor="w"
         ).pack(side="left")
         
@@ -111,7 +111,7 @@ class SavingsFrame(tk.Frame):
             font=("Comic Sans MS", 12),
             bg="#ffdddd",
             fg="#333333",
-            width=15,
+            width=20,
             anchor="w"
         ).pack(side="left")
         

@@ -176,11 +176,20 @@ class ProfileFrame(tk.Frame):
         height = self.winfo_height()
         
         if width > 1 and height > 1:  # Avoid division by zero or negative values
-            # Reposition title text
-            self.canvas.coords(self.title_text, width/2, height*0.13)
+            # Reposition title text - use a fixed distance from top instead of percentage
+            self.canvas.coords(self.title_text, width/2, 70)  # Fixed 70px from top
             
-            # Reposition profile frame
-            self.profile_frame.place_configure(relx=0.5, rely=0.48)
+            # Also adjust the profile frame for better proportions
+            frame_width = min(400, width * 0.8)  # Responsive width
+            frame_height = min(480, height * 0.7)  # Responsive height
+            
+            # Reposition profile frame with better vertical alignment
+            self.profile_frame.place_configure(
+                relx=0.5, 
+                rely=0.48,
+                width=frame_width, 
+                height=frame_height
+            )
     
     def update_profile_info(self):
         """Update profile information from current user"""
