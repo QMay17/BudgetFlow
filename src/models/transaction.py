@@ -6,7 +6,6 @@ def save_transaction(category, amount, trans_type, description=None, user_id=Non
     Save a transaction to the database
     
     Args:
-        name: Transaction name
         category (str): Transaction category
         amount (float): Transaction amount
         trans_type (str): Transaction type (e.g., 'Saving', 'Expense')
@@ -25,10 +24,10 @@ def save_transaction(category, amount, trans_type, description=None, user_id=Non
             # For simplicity, use user_id=1 if not logged in
             user_id = 1
         
-        cursor.execute("""
-        INSERT INTO transactions (category, amount, type, name)
-        VALUES (?, ?, ?, ?)
-        """, (category, amount, type_name, name))
+        cursor.execute(
+            "INSERT INTO transactions (user_id, category, amount, type, description, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (user_id, category, amount, trans_type, description, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        )
         
         transaction_id = cursor.lastrowid
         conn.commit()

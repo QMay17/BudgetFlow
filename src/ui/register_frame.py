@@ -81,29 +81,33 @@ class RegisterFrame(tk.Frame):
         self.register_frame.place(relx=0.5, rely=0.5, anchor="center", width=400, height=400)
         
         # Bind resize event
-        #self.bind("<Configure>", self.on_resize)
-        
-    
+        self.bind("<Configure>", self.on_resize)
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
     def on_resize(self, event):
         """Handle window resize event"""
-        if event:
-            # Update canvas size
-            self.canvas.config(width=event.width, height=event.height)
-        
-        # Get current window dimensions
         width = self.winfo_width()
         height = self.winfo_height()
         
-        if width > 1 and height > 1:  # Avoid division by zero or negative values
-            # Reposition title text
-            self.canvas.coords(self.title_text, width/2, height*0.12)  
+        if width > 1 and height > 1:  # Ensure window has valid size
+            # Update canvas size
+            self.canvas.config(width=width, height=height)
             
-            # Reposition registration frame
-            self.register_frame.place_configure(relx=0.5, rely=0.55)  
+            # Reposition title text
+            self.canvas.coords(self.title_text, width/2, height*0.15)  
+            
+            # Adjust registration frame size and position
+            frame_width = min(400, width * 0.8)  # Responsive width
+            frame_height = min(400, height * 0.7)  # Responsive height
+            
+            self.register_frame.place_configure(
+                relx=0.5, 
+                rely=0.5,
+                width=frame_width, 
+                height=frame_height
+            )
 
     def submit_registration(self):
         user_data = {k: v.get().strip() for k, v in self.entries.items()}

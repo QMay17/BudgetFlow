@@ -47,6 +47,7 @@ class BudgetFlowApp(tk.Tk):
         
         # Show the Welcome frame
         self.show_frame("welcome")
+        self.show_frame("profile")
     
     def setup_frames(self):
         """Initialize all frames and add them to the frames dictionary"""

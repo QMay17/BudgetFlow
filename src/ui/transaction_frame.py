@@ -48,6 +48,11 @@ class TransactionFrame(tk.Frame):
         )
         self.title_label.grid(row=0, column=0, columnspan=4, pady=(15, 20), sticky="n")
 
+        for i in range(6):  # Assuming you have 6 rows
+            self.grid_rowconfigure(i, weight=1)
+        for i in range(4):  # Assuming you have 4 columns
+            self.grid_columnconfigure(i, weight=1)
+
         # Create frames
         self.create_income_header()
         self.create_input_section()
@@ -183,7 +188,7 @@ class TransactionFrame(tk.Frame):
     def create_input_section(self):
         # Left section - Expense input
         self.input_frame = tk.Frame(self, bg="#ffdddd", padx=20, pady=20, relief="flat")
-        self.input_frame.grid(row=2, column=0, padx=30, pady=10, sticky="n")
+        self.input_frame.grid(row=2, column=0, padx=30, pady=10, sticky="nsew")
         
         # Input section title
         input_title = tk.Label(
@@ -313,7 +318,7 @@ class TransactionFrame(tk.Frame):
             relief="ridge", 
             bd=2
         )
-        self.summary_frame.grid(row=2, column=1, padx=20, pady=10, sticky="n")
+        self.summary_frame.grid(row=2, column=1, padx=20, pady=10, sticky="nsew")
         
         # Total income
         self.income_container = tk.Frame(self.summary_frame, bg="#fff8e0")
@@ -364,7 +369,7 @@ class TransactionFrame(tk.Frame):
             self.expense_categories[category] = label
         
         # Separator
-        separator = tk.Frame(self.summary_frame, height=2, bg="#ffb3b3")
+        separator = tk.Frame(self.summary_frame, height=2, bg="#ffb3b3")  
         separator.pack(fill="x", pady=8)
         
         # Total expenses
@@ -402,7 +407,7 @@ class TransactionFrame(tk.Frame):
             relief="ridge",
             bd=2
         )
-        self.savings_summary_frame.grid(row=2, column=2, padx=20, pady=10, sticky="n")
+        self.savings_summary_frame.grid(row=2, column=2, padx=20, pady=10, sticky="nsew")
 
         # ⊙ Total income
         self.savings_income_container = tk.Frame(self.savings_summary_frame, bg="#fff8e0")
@@ -454,19 +459,19 @@ class TransactionFrame(tk.Frame):
             self.saving_labels[category] = label
 
         # Separator
-        separator = tk.Frame(self.savings_summary_frame, height=2, bg="#b3ffb3")
+        separator = tk.Frame(self.savings_summary_frame, height=2, bg="#ffb3b3")
         separator.pack(fill="x", pady=8)
 
         # Total Savings
         self.total_savings = 0
-        self.savings_total_container = tk.Frame(self.savings_summary_frame, bg="#b3ffb3")
+        self.savings_total_container = tk.Frame(self.savings_summary_frame, bg="#ffb3b3") 
         self.savings_total_container.pack(fill="x", pady=2)
 
         tk.Label(
             self.savings_total_container,
             text="Total savings ...",
             font=("Comic Sans MS", 14),
-            bg="#ffb3b3",
+            bg="#ffb3b3",  
             fg="#ffffff",
             anchor="w"
         ).pack(side="left", padx=5)
@@ -475,7 +480,7 @@ class TransactionFrame(tk.Frame):
             self.savings_total_container,
             text="$0",
             font=("Comic Sans MS", 14),
-            bg="#b3ffb3",
+            bg="#ffb3b3",  
             fg="#ffffff",
             anchor="e"
         )
@@ -486,8 +491,8 @@ class TransactionFrame(tk.Frame):
     def create_transaction_table(self):
         # Transaction table
         self.table_frame = tk.Frame(self, bg="#f5efef")
-        self.table_frame.grid(row=3, column=0, columnspan=2, padx=30, pady=(30, 10), sticky="ew")
-        
+        self.table_frame.grid(row=3, column=0, columnspan=3, padx=30, pady=(30, 10), sticky="nsew")
+ 
         # Table with header style
         columns = ("Category", "Amount", "Type")
         
@@ -547,7 +552,7 @@ class TransactionFrame(tk.Frame):
     def create_navigation_buttons(self):
         # Navigation buttons
         self.button_frame = tk.Frame(self, bg="#f5efef")
-        self.button_frame.grid(row=5, column=0, columnspan=2, pady=20)
+        self.button_frame.grid(row=5, column=0, columnspan=3, pady=20, sticky="n")
         
         tk.Button(
             self.button_frame,
@@ -562,7 +567,7 @@ class TransactionFrame(tk.Frame):
         
         tk.Button(
             self.button_frame,
-            text="Done",
+            text="Save",
             font=("Comic Sans MS", 12),
             bg="#d4fcd4",
             fg="#333333",
@@ -634,7 +639,7 @@ class TransactionFrame(tk.Frame):
         })
         
         # Save to database (using your existing function)
-        save_transaction(category, amount, trans_type, name=name)
+        save_transaction(category, amount, trans_type, description=name)
         
         # Insert into table
         self.transaction_table.insert("", tk.END, values=(category, f"${amount:.2f}", trans_type))
@@ -803,5 +808,5 @@ class TransactionFrame(tk.Frame):
         messagebox.showinfo("Edit Mode", f"Now modify the inputs and click 'Add' to re-save the {trans_type.lower()}.")
 
     def finish_session(self):
-        messagebox.showinfo("Done", "All transactions saved!")
+        messagebox.showinfo("Save", "All transactions saved!")
         self.controller.show_frame("profile")

@@ -8,7 +8,8 @@ class LoginFrame(tk.Frame):
         self.controller = controller
         
         # Create and place background canvas
-        self.canvas = tk.Canvas(self, width=800, height=600, highlightthickness=0, bg="#f1e7e7")
+        #self.canvas = tk.Canvas(self, width=800, height=600, highlightthickness=0, bg="#f1e7e7")
+        self.canvas = tk.Canvas(self, highlightthickness=0, bg="#f1e7e7")
         self.canvas.pack(fill="both", expand=True)
         
         # Create elements on canvas - we'll use canvas.itemconfig to update positions later
