@@ -76,8 +76,8 @@ class ReportFrame(tk.Frame):
             self.canvas.coords(self.title_text, width//2, 50)
             
             # Reposition AND resize notebook
-            notebook_width = int(width * 0.85)  # Use 85% of window width
-            notebook_height = int(height * 0.7)  # Use 70% of window height
+            notebook_width = int(width * 0.85)  
+            notebook_height = int(height * 0.7)  
             
             # Update both position and size of the notebook window
             self.canvas.coords(self.notebook_window, width//2, height//2)
@@ -111,8 +111,7 @@ class ReportFrame(tk.Frame):
         
         # Create a figure for the pie chart
         fig, ax = plt.subplots(figsize=(6, 4))
-        
-        # Group by category
+
         # Group by category and name
         categories = {}
         for tx in saving_transactions:
@@ -234,7 +233,7 @@ class ReportFrame(tk.Frame):
         fig, ax = plt.subplots(figsize=(6, 4))
         
         # For demo purposes, simulate monthly data if transaction dates aren't available
-        # In a real application, you would use actual transaction dates
+        # In a real application, we would use actual transaction dates
         months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
         categories = set(tx['category'] for tx in expense_transactions)
         

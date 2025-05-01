@@ -5,7 +5,6 @@ from src.models.transaction import (
     load_all_transactions
 )
 
-
 class TransactionFrame(tk.Frame):
     def __init__(self, parent, controller, user=None):
         super().__init__(parent)
@@ -21,7 +20,7 @@ class TransactionFrame(tk.Frame):
             "Personal spending": 0,
             "Recreation": 0
         }
-        self.savings = []  # to store all transactions
+        self.savings = []  # to store all saving transactions
         self.total_savings = 0
         self.saving_categories = {
             "Vacation": 0,
@@ -31,7 +30,7 @@ class TransactionFrame(tk.Frame):
             "House": 0,
             "Shopping": 0
         }
-        self.total_income = 0  # Default income value
+        self.total_income = 0  
         self.income_types = ["Paycheck", "Investment", "Scholarships", "Bonuses", "Others"]
         self.saving_labels = {}  # Initialize the labels dictionary
 
@@ -48,9 +47,9 @@ class TransactionFrame(tk.Frame):
         )
         self.title_label.grid(row=0, column=0, columnspan=4, pady=(15, 20), sticky="n")
 
-        for i in range(6):  # Assuming you have 6 rows
+        for i in range(6):  
             self.grid_rowconfigure(i, weight=1)
-        for i in range(4):  # Assuming you have 4 columns
+        for i in range(4):  
             self.grid_columnconfigure(i, weight=1)
 
         # Create frames
@@ -60,6 +59,13 @@ class TransactionFrame(tk.Frame):
         self.create_savings_summary_section() #for savings 
         self.create_transaction_table()
         self.create_navigation_buttons()
+
+        # Bind resize event
+        self.bind("<Configure>", self.on_resize)
+
+        # Initial resize call to set positions
+        self.update_idletasks()
+        self.on_resize(None)
 
         self.load_transaction_data()
 
@@ -145,7 +151,6 @@ class TransactionFrame(tk.Frame):
         )
         self.income_dropdown.grid(row=0, column=1, padx=5)
 
-        # Add these styles for the Combobox
         style = ttk.Style()
         style.map('TCombobox', fieldbackground=[('readonly', 'white')])
         style.map('TCombobox', selectbackground=[('readonly', 'white')])
@@ -162,7 +167,6 @@ class TransactionFrame(tk.Frame):
         )
         self.income_button.grid(row=0, column=2, padx=5)
         
-        # Changed black background to white with black text
         self.income_entry = tk.Entry(
             self.income_frame, 
             font=("Comic Sans MS", 10), 
@@ -228,8 +232,6 @@ class TransactionFrame(tk.Frame):
         ).grid(row=2, column=0, pady=5, sticky="w")
         
         # Custom style for combobox
-        # For the category dropdown (in create_input_section method)
-        # Replace the existing style with this:
         style = ttk.Style()
         style.configure("TCombobox", fieldbackground="#ffffff", background="#ffffff")
         style.map('TCombobox', fieldbackground=[('readonly', 'white')])
@@ -395,7 +397,6 @@ class TransactionFrame(tk.Frame):
         )
         self.total_value.pack(side="right", padx=5)
 
-
     #for savings 
     def create_savings_summary_section(self):
         # Right section - Savings Summary
@@ -409,7 +410,7 @@ class TransactionFrame(tk.Frame):
         )
         self.savings_summary_frame.grid(row=2, column=2, padx=20, pady=10, sticky="nsew")
 
-        # ⊙ Total income
+        # Total income
         self.savings_income_container = tk.Frame(self.savings_summary_frame, bg="#fff8e0")
         self.savings_income_container.pack(fill="x", pady=2)
 
@@ -512,18 +513,14 @@ class TransactionFrame(tk.Frame):
             height=6
         )
         
-        # For the scrollbar (in create_transaction_table method)
-        # Replace the existing scrollbar setup with this:
         scrollbar = ttk.Scrollbar(self.tree_container, orient="vertical", command=self.transaction_table.yview)
         self.transaction_table.configure(yscrollcommand=scrollbar.set)
 
-        # Add this style configuration for the scrollbar
         style = ttk.Style()
         style.configure("Vertical.TScrollbar", background="white", arrowcolor="black", 
                         troughcolor="white", bordercolor="white")
         scrollbar.configure(style="Vertical.TScrollbar")
         
-        # Set up columns
         for col in columns:
             self.transaction_table.heading(col, text=col)
             self.transaction_table.column(col, anchor="center", width=140)
@@ -626,8 +623,7 @@ class TransactionFrame(tk.Frame):
         except ValueError:
             messagebox.showerror("Invalid Input", "Please enter a valid amount.")
             return
-        
-        # For compatibility with your existing code
+
         trans_type = self.type_var.get()
         
         # Store in memory
@@ -638,7 +634,7 @@ class TransactionFrame(tk.Frame):
             "type": trans_type
         })
         
-        # Save to database (using your existing function)
+        # Save to database 
         save_transaction(category, amount, trans_type, description=name)
         
         # Insert into table
@@ -697,7 +693,7 @@ class TransactionFrame(tk.Frame):
         if not confirm:
             return
 
-        # Delete from DB (keeping your original code)
+        # Delete from DB 
         from src.models.database import get_transactions_db_connection as get_db_connection
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -712,7 +708,7 @@ class TransactionFrame(tk.Frame):
         conn.commit()
         conn.close()
 
-        # Update summary (subtract the amount)
+        # Update summary
         if trans_type == "Expense" and category in self.expense_categories:
             current_text = self.expense_categories[category].cget("text")
             current_amount = float(current_text.replace("$", ""))
@@ -736,7 +732,6 @@ class TransactionFrame(tk.Frame):
             self.total_savings -= amount
             self.savings_total_value.config(text=f"${self.total_savings:.2f}")
 
-
         # Delete from table
         self.transaction_table.delete(selected[0])
         messagebox.showinfo("Deleted", "Transaction deleted.")
@@ -752,7 +747,7 @@ class TransactionFrame(tk.Frame):
         category, amount_text, trans_type = values
         amount = float(amount_text.strip("$"))
 
-        # Remove original entry from table (always)
+        # Remove original entry from table 
         self.transaction_table.delete(selected[0])
 
         # Subtract from the appropriate summary
@@ -810,3 +805,31 @@ class TransactionFrame(tk.Frame):
     def finish_session(self):
         messagebox.showinfo("Save", "All transactions saved!")
         self.controller.show_frame("profile")
+
+    def on_resize(self, event):
+        """Handle window resize events for the TransactionFrame"""
+        # Get current window dimensions
+        width = self.winfo_width()
+        height = self.winfo_height()
+        
+        if width > 1 and height > 1:  # Avoid division by zero or negative value
+            # Adjust title size and position
+            title_font_size = max(16, min(20, int(width / 40)))  
+            self.title_label.config(font=("Comic Sans MS", title_font_size, "bold"))
+            
+            # Adjust frame sizes proportionally
+            # For smaller screens, make frames stack vertically
+            if width < 800:
+                # Move to vertical layout
+                self.input_frame.grid(row=2, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
+                self.summary_frame.grid(row=3, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
+                self.savings_summary_frame.grid(row=4, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
+                self.table_frame.grid(row=5, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
+                self.button_frame.grid(row=6, column=0, columnspan=3, pady=20, sticky="n")
+            else:
+                # Restore horizontal layout
+                self.input_frame.grid(row=2, column=0, padx=30, pady=10, sticky="nsew")
+                self.summary_frame.grid(row=2, column=1, padx=20, pady=10, sticky="nsew")
+                self.savings_summary_frame.grid(row=2, column=2, padx=20, pady=10, sticky="nsew")
+                self.table_frame.grid(row=3, column=0, columnspan=3, padx=30, pady=(30, 10), sticky="nsew")
+                self.button_frame.grid(row=5, column=0, columnspan=3, pady=20, sticky="n")

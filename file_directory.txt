@@ -10,23 +10,18 @@ BudgetFlow/
 │   │   ├── register_frame.py # Account creation screen
 │   │   ├── profile_frame.py # User profile screen
 │   │   ├── transaction_frame.py # UI for adding/editing transactions
-│   │   ├── report_frame.py # Visualization and report display
 │   │   ├── saving_frame.py # Budget goals and alerts interface
-│   │   └── common_widgets.py # Reusable Tkinter widgets/components
+│   │   └── report_frame.py # Visualization and report display
 │   
 │   ├── controllers/        # Logic connecting UI to core functionality
 │   │   ├── __init__.py
 │   │   ├── auth_controller.py    # Authentication controller
-│   │   ├── transaction_controller.py # Transaction handling controller
-│   │   ├── report_controller.py  # Report generation controller
-│   │   └── budget_controller.py  # Budget management controller
+│   │   └── transaction_controller.py # Transaction handling controller
 │   
 │   ├── core/               # Core business logic and computational modules
 │   │   ├── __init__.py
 │   │   ├── auth.py         # Authentication and user management logic
-│   │   ├── transactions.py # Core transaction processing and validation
-│   │   ├── reports.py      # Report generation and financial calculations
-│   │   └── budget_manager.py # Budget tracking and goal-setting logic
+│   │   └── transactions.py # Core transaction processing and validation
 │   
 │   ├── models/             # Data models and database interactions
 │   │   ├── __init__.py
@@ -39,26 +34,17 @@ BudgetFlow/
 │       ├── __init__.py
 │       ├── validators.py   # Input validation helpers
 │       ├── password_utils.py # Secure password handling
-│       ├── formatters.py   # Data formatting utilities
-│       └── tk_helpers.py   # Tkinter-specific helper functions
+│       └── formatters.py   # Data formatting utilities
 │   
 ├── tests/                  # Comprehensive test suite
 │   ├── test_auth.py        # Authentication module tests
-│   ├── test_transactions.py # Transaction processing tests
-│   ├── test_reports.py     # Reporting functionality tests
-│   └── test_budget.py      # Budget goal and tracking tests
+│   └── test_transactions.py # Transaction processing tests
 │   
 ├── data/                   # Application data storage
 │   ├── budgetflow.db       # SQLite user database
 │   └── transactions.db     # Transaction history database
 │
 ├── setup_db.py             # Script to initialize database
-│   
-├── assets/                 # Static assets
-│   ├── icons/              # Application and button icons
-│   ├── images/             # Background and UI images
-│   └── themes/             # Tkinter theme files
-│       └── default.py      # Default theme settings
 │   
 ├── requirements.txt        # Python package dependencies (remove Flask, add matplotlib/other vis tools)
 └── README.md               # Project overview and quick start guide

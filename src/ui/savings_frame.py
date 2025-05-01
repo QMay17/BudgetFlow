@@ -157,8 +157,8 @@ class SavingsFrame(tk.Frame):
         self.chart_window = self.canvas.create_window(
             550, 270,  # Adjust y-coordinate to match form frame
             window=self.chart_frame,
-            width=500,  # Increased from 350
-            height=400,  # Increased from 350
+            width=500,  
+            height=400,  
             anchor="center"
         )
         
@@ -207,15 +207,15 @@ class SavingsFrame(tk.Frame):
             
             # Calculate new positions for frames
             center = width/2
-            max_half_distance = min(350, width/4)  # Cap the maximum distance between frames
+            max_half_distance = min(350, width/4)  
             left_pos = center - max_half_distance
             right_pos = center + max_half_distance
             
-            # Resize and reposition frames - make them larger
-            form_width = min(500, width * 0.45)  # Increased from 0.4
-            form_height = min(400, height * 0.6)  # Increased from 0.5
-            chart_width = min(500, width * 0.45)  # Increased from 0.4
-            chart_height = min(400, height * 0.6)  # Increased from 0.5
+            # Resize and reposition frames 
+            form_width = min(500, width * 0.45)  
+            form_height = min(400, height * 0.6)  
+            chart_width = min(500, width * 0.45)  
+            chart_height = min(400, height * 0.6)  
             
             # Update form frame
             self.canvas.coords(self.form_window, left_pos, center_y)
@@ -225,7 +225,7 @@ class SavingsFrame(tk.Frame):
             self.canvas.coords(self.chart_window, right_pos, center_y)
             self.canvas.itemconfig(self.chart_window, width=chart_width, height=chart_height)
             
-            # Update navigation buttons - keep them low
+            # Update navigation buttons
             self.canvas.coords(self.nav_button_window, width/2, center_y + form_height/2 + 50)
     
     def show_pie_chart(self):
