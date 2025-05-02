@@ -613,41 +613,53 @@ class TransactionFrame(tk.Frame):
         name = self.name_entry.get()
         category = self.category_dropdown.get()
         amount_str = self.amount_entry.get()
-        
+
         if not name or not category or not amount_str:
             messagebox.showerror("Missing Information", "Please fill in all fields.")
             return
-            
+
         try:
             amount = float(amount_str)
         except ValueError:
             messagebox.showerror("Invalid Input", "Please enter a valid amount.")
             return
 
+        try:
+            amount = float(amount_str)
+            if amount <= 0:
+                messagebox.showerror("Invalid Amount", "Amount must be greater than zero.")
+                return
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Please enter a valid amount.")
+            return
+
         trans_type = self.type_var.get()
-        
-        # Store in memory
+
+        # Attempt to save to database
+        transaction_id = save_transaction(category, amount, trans_type, description=name)
+        if transaction_id is None:
+            messagebox.showerror("Invalid Transaction", "Transaction was not saved. Please check your input.")
+            return
+
+        # Store in memory (only if saved)
         self.transactions.append({
             "name": name,
             "category": category,
             "amount": amount,
             "type": trans_type
         })
-        
-        # Save to database 
-        save_transaction(category, amount, trans_type, description=name)
-        
+
         # Insert into table
         self.transaction_table.insert("", tk.END, values=(category, f"${amount:.2f}", trans_type))
-        
+
         # Update summary
         self.update_summary(category, amount, trans_type)
-        
+
         # Reset inputs
         self.name_entry.delete(0, tk.END)
         self.amount_entry.delete(0, tk.END)
-        self.update_category_dropdown() 
-        
+        self.update_category_dropdown()
+
         messagebox.showinfo("Success", f"Added ${amount:.2f} to {category}")
 
     def update_summary(self, category, amount, trans_type="Expense"):
