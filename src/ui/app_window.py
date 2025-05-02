@@ -3,7 +3,27 @@ from tkinter import ttk
 from pathlib import Path
 
 class AppWindow(tk.Frame):
+    """
+    Main application window for BudgetFlow.
+    
+    This class creates the welcome screen with title, subtitle, and navigation buttons.
+    It inherits from tk.Frame and handles responsive layout through canvas elements.
+    
+    Attributes:
+        controller: Reference to the main application controller
+        canvas: Canvas widget for drawing text and containing buttons
+    """
     def __init__(self, parent, controller):
+        """
+        Initialize the AppWindow with UI elements.
+        
+        Creates and positions all UI components including title text, buttons,
+        and sets up the responsive canvas layout.
+        
+        Args:
+            parent: Parent widget that contains this frame
+            controller: Application controller for navigation between frames
+        """
         super().__init__(parent)
         self.controller = controller
 
@@ -67,7 +87,18 @@ class AppWindow(tk.Frame):
         self.bind("<Configure>", self.on_resize)
 
     def on_resize(self, event):
-        """Handle window resize event"""
+        """
+        Handle window resize events to maintain responsive layout.
+        
+        Repositions all UI elements based on the new window dimensions,
+        keeping them centered and properly spaced.
+        
+        Args:
+            event: The Configure event containing new window dimensions
+                   
+        Returns:
+            None: Early returns if window dimensions are invalid
+        """
         width = self.winfo_width()
         height = self.winfo_height()
         

@@ -6,7 +6,33 @@ from src.models.transaction import load_all_transactions
 from datetime import datetime
 
 class SavingsFrame(tk.Frame):
+    """
+    A frame for tracking and visualizing savings goals.
+    
+    This class provides a user interface for setting savings goals and visualizing
+    progress towards these goals using interactive charts. Users can set a target amount,
+    deadline, and category for their savings goals, and view their progress using
+    either pie charts or bar charts.
+    
+    Attributes:
+        controller: The main application controller
+        saved_amount: The current amount saved towards the goal
+        chart_canvas: The matplotlib canvas for displaying charts
+        text_label: Label for displaying summary information about the savings goal
+        canvas: Background canvas for the frame
+        form_frame: Frame containing the input form elements
+        chart_frame: Frame containing the visualization charts
+    """
     def __init__(self, parent, controller):
+        """
+        Initialize the SavingsFrame with parent widget and controller.
+        
+        Sets up the UI layout with a form for input and an area for chart display.
+        
+        Args:
+            parent: The parent widget
+            controller: The main application controller for navigation
+        """
         super().__init__(parent)
         self.controller = controller
         self.saved_amount = 0
@@ -186,7 +212,15 @@ class SavingsFrame(tk.Frame):
         self.bind("<Configure>", self.on_resize)
     
     def on_resize(self, event):
-        """Handle window resize event"""
+        """
+        Handle window resize events to ensure responsive layout.
+        
+        Adjusts the position and size of UI elements based on the new window dimensions.
+        This method ensures the UI remains usable at different window sizes.
+        
+        Args:
+            event: The resize event containing window information
+        """
         width = self.winfo_width()
         height = self.winfo_height()
         
@@ -229,6 +263,15 @@ class SavingsFrame(tk.Frame):
             self.canvas.coords(self.nav_button_window, width/2, center_y + form_height/2 + 50)
     
     def show_pie_chart(self):
+        """
+        Display a pie chart showing savings progress.
+        
+        Creates and displays a pie chart comparing saved amount to remaining
+        amount for the selected savings goal category. The chart includes
+        percentage labels and a text summary of the savings progress.
+        
+        Validates user input before creating the chart.
+        """
         self.clear_chart()
         category = self.goal_dropdown.get()
         try:
@@ -283,6 +326,16 @@ class SavingsFrame(tk.Frame):
         self.text_label.pack(pady=5)
 
     def show_bar_chart(self):
+        """
+        Display a bar chart comparing weekly savings target to actual savings.
+        
+        Creates and displays a bar chart that shows the weekly savings rate
+        needed to reach the goal by the deadline, compared to the current
+        weekly savings rate. Includes a suggestion for achieving the goal.
+        
+        Validates user input before creating the chart, including date format
+        and ensuring the deadline is in the future.
+        """
         self.clear_chart()
         category = self.goal_dropdown.get()
         
@@ -368,7 +421,12 @@ class SavingsFrame(tk.Frame):
         self.text_label.pack(pady=5)
 
     def clear_chart(self):
-        """Clear the chart display area"""
+        """
+        Clear the chart display area.
+        
+        Removes any existing chart and text labels from the chart frame.
+        This is called before drawing a new chart to ensure a clean display.
+        """
         if self.chart_canvas:
             self.chart_canvas.get_tk_widget().destroy()
             self.chart_canvas = None

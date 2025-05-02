@@ -3,7 +3,33 @@ from tkinter import ttk, messagebox
 from pathlib import Path
 
 class ProfileFrame(tk.Frame):
+    """
+    Profile page for the BudgetFlow application.
+    
+    This class creates and manages the user profile interface, displaying personal information
+    and providing navigation to other sections of the application. It handles user profile data
+    display and logout functionality.
+    
+    Attributes:
+        controller: Reference to the main application controller
+        canvas: Canvas widget for drawing text and containing the form
+        profile_frame: Frame containing the profile information and navigation buttons
+        welcome_label: Label displaying welcome message with user's name
+        username_value: Label displaying the user's username
+        full_name_value: Label displaying the user's full name
+        email_value: Label displaying the user's email
+    """
     def __init__(self, parent, controller):
+        """
+        Initialize the ProfileFrame with all UI elements.
+        
+        Creates and positions the profile information display, navigation buttons
+        for different application sections, and sets up event binding for responsive layout.
+        
+        Args:
+            parent: Parent widget that contains this frame
+            controller: Application controller for navigation and authentication
+        """
         super().__init__(parent)
         self.controller = controller
         
@@ -166,7 +192,19 @@ class ProfileFrame(tk.Frame):
         self.on_resize(None)
     
     def on_resize(self, event):
-        """Handle window resize event"""
+        """
+        Handle window resize events to maintain responsive layout.
+        
+        Repositions and resizes UI elements based on the new window dimensions,
+        ensuring proper display across different screen sizes.
+        
+        Args:
+            event: The Configure event containing new window dimensions.
+                   Can be None during initial setup.
+                   
+        Returns:
+            None: Early returns if window dimensions are invalid
+        """
         if event:
             # Update canvas size
             self.canvas.config(width=event.width, height=event.height)
@@ -194,7 +232,13 @@ class ProfileFrame(tk.Frame):
             )
     
     def update_profile_info(self):
-        """Update profile information from current user"""
+        """
+        Update profile information display with current user data.
+        
+        Retrieves the current user from the authentication controller and updates
+        the displayed information in the profile labels. Clears the display fields
+        if no user is logged in.
+        """
         # Get current user from auth controller
         current_user = self.controller.auth_controller.get_current_user()
         
@@ -214,7 +258,12 @@ class ProfileFrame(tk.Frame):
             self.email_value.config(text="")
     
     def logout(self):
-        """Handle logout process"""
+        """
+        Handle the user logout process.
+        
+        Calls the authentication controller to log out the current user and
+        resets all profile information fields to their default empty state.
+        """
         # Call logout method from auth controller
         self.controller.auth_controller.handle_logout()
         

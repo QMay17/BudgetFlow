@@ -3,7 +3,30 @@ import re
 from tkinter import messagebox
 
 class RegisterFrame(tk.Frame):
+    """
+    Registration page for the BudgetFlow application.
+    
+    This class creates and manages the user registration interface, collecting user
+    information for account creation. It handles form validation and submits valid
+    registration data to the authentication controller.
+    
+    Attributes:
+        controller: Reference to the main application controller
+        canvas: Canvas widget for drawing text and containing the form
+        register_frame: Frame containing registration form elements
+        entries: Dictionary mapping field names to their corresponding entry widgets
+    """
     def __init__(self, parent, controller):
+        """
+        Initialize the RegisterFrame with all UI elements.
+        
+        Creates and positions the registration form with fields for user information,
+        validation buttons, and sets up event binding for responsive layout.
+        
+        Args:
+            parent: Parent widget that contains this frame
+            controller: Application controller for navigation and authentication
+        """
         super().__init__(parent)
         self.controller = controller
 
@@ -87,7 +110,18 @@ class RegisterFrame(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
 
     def on_resize(self, event):
-        """Handle window resize event"""
+        """
+        Handle window resize events to maintain responsive layout.
+        
+        Repositions and resizes UI elements based on the new window dimensions,
+        ensuring proper display across different screen sizes.
+        
+        Args:
+            event: The Configure event containing new window dimensions
+                   
+        Returns:
+            None: Early returns if window dimensions are invalid
+        """
         width = self.winfo_width()
         height = self.winfo_height()
         
@@ -110,6 +144,21 @@ class RegisterFrame(tk.Frame):
             )
 
     def submit_registration(self):
+        """
+        Validate and process the registration form submission.
+        
+        Performs validation checks on all input fields including:
+        - Ensuring no fields are empty
+        - Validating email format
+        - Confirming password match
+        - Checking password strength
+        
+        If all validations pass, submits the registration data to the auth controller.
+        Displays appropriate error messages for validation failures.
+        
+        Returns:
+            None
+        """
         user_data = {k: v.get().strip() for k, v in self.entries.items()}
 
         # Check for empty fields

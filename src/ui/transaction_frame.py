@@ -6,7 +6,38 @@ from src.models.transaction import (
 )
 
 class TransactionFrame(tk.Frame):
+    """
+    A frame for managing financial transactions in a budget tracker application.
+    
+    This class provides a comprehensive UI for users to add, edit, and delete
+    financial transactions across three types: expenses, savings, and income.
+    It includes summary sections that display running totals, a transaction
+    table, and form inputs for creating new transactions.
+    
+    Attributes:
+        controller: The main application controller for navigation
+        user: The current user object (optional)
+        transactions: List to store transaction data in memory
+        total_expenses: Running total of all expenses
+        expense_categories: Dictionary mapping expense categories to their label widgets
+        savings: List to store saving transactions
+        total_savings: Running total of all savings
+        saving_categories: Dictionary mapping saving categories to their monetary values
+        saving_labels: Dictionary mapping saving categories to their label widgets
+        total_income: Running total of all income
+        income_types: List of available income categories
+    """
     def __init__(self, parent, controller, user=None):
+        """
+        Initialize the TransactionFrame with parent widget, controller, and user.
+        
+        Sets up the UI layout with input forms, summary sections, and transaction table.
+        
+        Args:
+            parent: The parent widget
+            controller: The main application controller for navigation
+            user: The current user object (optional)
+        """
         super().__init__(parent)
         self.controller = controller
         self.user = user
@@ -70,7 +101,13 @@ class TransactionFrame(tk.Frame):
         self.load_transaction_data()
 
     def load_transaction_data(self):
-        """Load transaction data from the database and update the UI"""
+        """
+        Load transaction data from the database and update the UI.
+        
+        Retrieves all transactions for the current user from the database,
+        clears the existing display, and updates the UI with the loaded data.
+        Updates category summaries and totals for expenses, savings, and income.
+        """
         user_id = None
         if hasattr(self, 'user') and self.user:
             user_id = self.user.id
@@ -126,6 +163,13 @@ class TransactionFrame(tk.Frame):
         self.savings_income_value.config(text=f"${self.total_income:.2f}")
 
     def create_income_header(self):
+        """
+        Create the income header section of the UI.
+        
+        Sets up the UI elements for displaying and adding income transactions,
+        including a dropdown for income types, entry field for amount,
+        and a button to add the income.
+        """
         # Income header section
         self.income_frame = tk.Frame(self, bg="#f5efef")
         self.income_frame.grid(row=1, column=0, columnspan=4, pady=(0, 15), sticky="ew")
@@ -190,6 +234,13 @@ class TransactionFrame(tk.Frame):
         self.add_income_button.grid(row=0, column=4, padx=5)
 
     def create_input_section(self):
+        """
+        Create the transaction input section of the UI.
+        
+        Sets up the form elements for creating new transactions,
+        including fields for name, category, amount, and transaction type.
+        Contains a dropdown to switch between expense and saving categories.
+        """
         # Left section - Expense input
         self.input_frame = tk.Frame(self, bg="#ffdddd", padx=20, pady=20, relief="flat")
         self.input_frame.grid(row=2, column=0, padx=30, pady=10, sticky="nsew")
@@ -302,6 +353,15 @@ class TransactionFrame(tk.Frame):
         self.add_button.grid(row=5, column=1, pady=15, sticky="e")
 
     def update_category_dropdown(self, event=None):
+        """
+        Update the category dropdown based on the selected transaction type.
+        
+        Changes the available categories in the dropdown based on whether
+        'Expense' or 'Saving' is selected in the type dropdown.
+        
+        Args:
+            event: The event triggering this method (optional)
+        """
         selected_type = self.type_var.get()
         if selected_type == "Expense":
             self.category_dropdown['values'] = list(self.expense_categories.keys())
@@ -311,6 +371,13 @@ class TransactionFrame(tk.Frame):
             self.category_dropdown.set("Vacation")
 
     def create_summary_section(self):
+        """
+        Create the expense summary section of the UI.
+        
+        Sets up the UI elements for displaying expense category totals
+        and overall expense total. Creates labels for each expense category
+        and stores references to them in the expense_categories dictionary.
+        """
         # Right section - Summary
         self.summary_frame = tk.Frame(
             self, 
@@ -397,8 +464,14 @@ class TransactionFrame(tk.Frame):
         )
         self.total_value.pack(side="right", padx=5)
 
-    #for savings 
     def create_savings_summary_section(self):
+        """
+        Create the savings summary section of the UI.
+        
+        Sets up the UI elements for displaying savings category totals
+        and overall savings total. Creates labels for each savings category
+        and stores references to them in the saving_labels dictionary.
+        """
         # Right section - Savings Summary
         self.savings_summary_frame = tk.Frame(
             self,
@@ -490,6 +563,13 @@ class TransactionFrame(tk.Frame):
         self.savings_total_value.pack(side="right", padx=5)
 
     def create_transaction_table(self):
+        """
+        Create the transaction table section of the UI.
+        
+        Sets up a treeview widget for displaying transactions with columns
+        for category, amount, and type. Includes a scrollbar and context
+        menu for editing and deleting transactions.
+        """
         # Transaction table
         self.table_frame = tk.Frame(self, bg="#f5efef")
         self.table_frame.grid(row=3, column=0, columnspan=3, padx=30, pady=(30, 10), sticky="nsew")
@@ -547,6 +627,12 @@ class TransactionFrame(tk.Frame):
         self.transaction_table.bind("<Button-3>", self.show_context_menu)
 
     def create_navigation_buttons(self):
+        """
+        Create the navigation buttons section of the UI.
+        
+        Sets up buttons for navigating back to the profile screen and
+        for saving the current session.
+        """
         # Navigation buttons
         self.button_frame = tk.Frame(self, bg="#f5efef")
         self.button_frame.grid(row=5, column=0, columnspan=3, pady=20, sticky="n")
@@ -575,6 +661,12 @@ class TransactionFrame(tk.Frame):
 
 
     def update_income(self):
+        """
+        Update the total income amount.
+        
+        Updates the display of total income in both expense and savings panels
+        based on the value in the income entry field.
+        """
         try:
             self.total_income = float(self.income_entry.get())
             self.income_value.config(text=f"${self.total_income:.2f}") #updates in expenses panel
@@ -584,8 +676,14 @@ class TransactionFrame(tk.Frame):
         except ValueError:
             messagebox.showerror("Invalid Input", "Please enter a valid amount for income.")
 
-    # New method to add income from the dropdown
     def add_income(self):
+        """
+        Add a new income transaction.
+        
+        Creates a new income transaction based on the selected income type
+        and amount entered. Updates the UI and saves the transaction to the database.
+        Validates the input before processing.
+        """
         try:
             amount = float(self.income_entry.get())
             income_type = self.income_type.get()
@@ -610,6 +708,13 @@ class TransactionFrame(tk.Frame):
             messagebox.showerror("Invalid Input", "Please enter a valid amount for income.")
 
     def add_transaction(self):
+        """
+        Add a new expense or saving transaction.
+        
+        Creates a new transaction based on the form inputs and selected transaction type.
+        Validates all inputs, updates the UI, and saves the transaction to the database.
+        Clears the form inputs after successful addition.
+        """
         name = self.name_entry.get()
         category = self.category_dropdown.get()
         amount_str = self.amount_entry.get()
@@ -663,6 +768,17 @@ class TransactionFrame(tk.Frame):
         messagebox.showinfo("Success", f"Added ${amount:.2f} to {category}")
 
     def update_summary(self, category, amount, trans_type="Expense"):
+        """
+        Update the summary section based on a new transaction.
+        
+        Updates the appropriate category total and overall total based on
+        the transaction type (Expense or Saving) and category.
+        
+        Args:
+            category: The transaction category
+            amount: The transaction amount
+            trans_type: The transaction type (Expense or Saving, defaults to Expense)
+        """
         # Update category amount
         if trans_type == "Expense":
             if category in self.expense_categories:
@@ -684,6 +800,15 @@ class TransactionFrame(tk.Frame):
                 self.savings_total_value.config(text=f"${self.total_savings:.2f}")
     
     def show_context_menu(self, event):
+        """
+        Display the context menu for a transaction.
+        
+        Shows a right-click context menu at the cursor position when
+        a transaction row is right-clicked.
+        
+        Args:
+            event: The mouse event triggering the context menu
+        """
         # Select the row under mouse before showing menu
         item_id = self.transaction_table.identify_row(event.y)
         if item_id:
@@ -691,6 +816,15 @@ class TransactionFrame(tk.Frame):
             self.context_menu.post(event.x_root, event.y_root)
 
     def delete_selected(self):
+        """
+        Delete the selected transaction.
+        
+        Removes the selected transaction from the UI and database after
+        confirmation. Updates the appropriate category and overall totals
+        based on the transaction type.
+        
+        Displays an error message if no transaction is selected.
+        """
         selected = self.transaction_table.selection()
         if not selected:
             messagebox.showwarning("No selection", "Please select a transaction to delete.")
@@ -749,6 +883,15 @@ class TransactionFrame(tk.Frame):
         messagebox.showinfo("Deleted", "Transaction deleted.")
 
     def edit_selected(self):
+        """
+        Edit the selected transaction.
+        
+        Prepares the form for editing by pre-filling it with the values
+        from the selected transaction. Removes the original transaction
+        from the UI and database so it can be re-added with modifications.
+        
+        Displays an error message if no transaction is selected.
+        """
         selected = self.transaction_table.selection()
         if not selected:
             messagebox.showwarning("No selection", "Please select a transaction to edit.")
@@ -815,11 +958,26 @@ class TransactionFrame(tk.Frame):
         messagebox.showinfo("Edit Mode", f"Now modify the inputs and click 'Add' to re-save the {trans_type.lower()}.")
 
     def finish_session(self):
+        """
+        Complete the current transaction session.
+        
+        Saves all transactions and returns to the profile screen.
+        Displays a confirmation message before navigating away.
+        """
         messagebox.showinfo("Save", "All transactions saved!")
         self.controller.show_frame("profile")
 
     def on_resize(self, event):
-        """Handle window resize events for the TransactionFrame"""
+        """
+        Handle window resize events for the TransactionFrame.
+        
+        Adjusts the layout of UI elements based on the current window size
+        to maintain usability at different resolutions. For smaller screens,
+        the layout changes from horizontal to vertical arrangement.
+        
+        Args:
+            event: The resize event containing window information (optional)
+        """
         # Get current window dimensions
         width = self.winfo_width()
         height = self.winfo_height()

@@ -7,22 +7,39 @@ import os
 # Set up path to import modules
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
-
-# Add src directory to the path so we can import modules
+sys.path.insert(0, parent_dir)  # Add src directory to the path so we can import modules
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.ui.app_window import AppWindow 
+from src.ui.app_window import AppWindow
 from src.ui.login_frame import LoginFrame
 from src.ui.register_frame import RegisterFrame
 from src.ui.profile_frame import ProfileFrame
-from src.ui.report_frame import ReportFrame 
+from src.ui.report_frame import ReportFrame
 from src.ui.transaction_frame import TransactionFrame
 from src.ui.savings_frame import SavingsFrame
-from src.controllers.auth_controller import AuthController 
+from src.controllers.auth_controller import AuthController
+
 
 class BudgetFlowApp(tk.Tk):
+    """
+    Main application class for BudgetFlow.
+    
+    This class initializes the main application window and manages
+    navigation between different frames. It serves as the container
+    for all UI frames and handles the authentication controller.
+    
+    Attributes:
+        auth_controller (AuthController): Controller handling user authentication
+        container (tk.Frame): Main container for all frames
+        frames (dict): Dictionary storing all UI frames
+    """
     def __init__(self):
+        """
+        Initialize the BudgetFlow application.
+        
+        Sets up the main window configuration, creates the container frame,
+        initializes all UI frames, and displays the welcome frame.
+        """
         super().__init__()
         self.auth_controller = AuthController(self)
         
@@ -43,13 +60,20 @@ class BudgetFlowApp(tk.Tk):
         self.frames = {}
         
         # Initialize the frames
-        self.setup_frames() 
-        
+        self.setup_frames()
+         
         # Show the Welcome frame
         self.show_frame("welcome")
     
     def setup_frames(self):
-        """Initialize all frames and add them to the frames dictionary"""
+        """
+        Initialize all frames and add them to the frames dictionary.
+        
+        Creates instances of all UI frames (welcome, login, register, profile,
+        transaction, savings, report) and adds them to the frames dictionary
+        for later access. Each frame is positioned in the same grid cell and
+        will be raised to the top when needed.
+        """
         # Welcome Frame
         app_window = AppWindow(self.container, self)
         self.frames["welcome"] = app_window
@@ -80,15 +104,25 @@ class BudgetFlowApp(tk.Tk):
         self.frames["savings"] = savings_frame
         savings_frame.grid(row=0, column=0, sticky="nsew")
         
-        # Report Frame (new)
+        # Report Frame 
         report_frame = ReportFrame(self.container, self)
         self.frames["report"] = report_frame
         report_frame.grid(row=0, column=0, sticky="nsew")
     
     def show_frame(self, frame_name):
-        """Show the frame with the given name"""
+        """
+        Show the frame with the given name.
+        
+        Raises the specified frame to the top of the stacking order,
+        making it visible to the user.
+        
+        Args:
+            frame_name (str): The name of the frame to display
+                             (e.g., "welcome", "login", "profile")
+        """
         frame = self.frames[frame_name]
-        frame.tkraise()  # Bring the frame to the top
+        frame.tkraise()
+
 
 if __name__ == "__main__":
     app = BudgetFlowApp()

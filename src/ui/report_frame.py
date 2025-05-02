@@ -7,7 +7,29 @@ from datetime import datetime, timedelta
 from src.models.transaction import load_all_transactions
 
 class ReportFrame(tk.Frame):
+    """
+    A frame for displaying financial reports using a tabbed interface.
+    
+    This class creates a UI for visualizing financial data including savings goals,
+    weekly spending, and monthly comparisons. It uses matplotlib to generate
+    charts embedded in a tkinter interface.
+    
+    Attributes:
+        controller: The main application controller
+        canvas: Background canvas for the frame
+        notebook: Tabbed interface for different report types
+        savings_tab: Tab for displaying savings goals progress
+        weekly_tab: Tab for displaying weekly spending
+        monthly_tab: Tab for displaying monthly spending comparisons
+    """
     def __init__(self, parent, controller):
+        """
+        Initialize the ReportFrame with parent widget and controller.
+        
+        Args:
+            parent: The parent widget
+            controller: The main application controller for navigation
+        """
         super().__init__(parent)
         self.controller = controller
         
@@ -33,7 +55,7 @@ class ReportFrame(tk.Frame):
             window=self.notebook, 
             width=self.winfo_width() * 0.85, 
             height=self.winfo_height() * 0.7
-)
+        )
         
         # Create tabs for different types of reports
         self.savings_tab = tk.Frame(self.notebook, bg="#f1e7e7")
@@ -64,7 +86,14 @@ class ReportFrame(tk.Frame):
         self.bind("<Configure>", self.on_resize)
     
     def on_resize(self, event):
-        """Handle window resize event"""
+        """
+        Handle window resize events to ensure responsive layout.
+        
+        Adjusts the position and size of UI elements based on the new window dimensions.
+        
+        Args:
+            event: The resize event containing window information
+        """
         width = self.winfo_width()
         height = self.winfo_height()
         
@@ -87,7 +116,12 @@ class ReportFrame(tk.Frame):
             self.back_button.place(x=(width//2) - 75, y=height - 70)
     
     def setup_savings_tab(self):
-        """Set up the Savings Goals tab"""
+        """
+        Configure the Savings Goals tab with a pie chart.
+        
+        Creates a pie chart showing the distribution of savings across different categories.
+        Displays a message if no savings data is available.
+        """
         # Title for the tab
         tk.Label(
             self.savings_tab,
@@ -143,7 +177,12 @@ class ReportFrame(tk.Frame):
         canvas.get_tk_widget().pack(fill="both", expand=True)
     
     def setup_weekly_tab(self):
-        """Set up the Weekly Spending tab"""
+        """
+        Configure the Weekly Spending tab with a bar chart.
+        
+        Creates a bar chart showing expenses by category for the week.
+        Displays a message if no expense data is available.
+        """
         # Title for the tab
         tk.Label(
             self.weekly_tab,
@@ -207,7 +246,13 @@ class ReportFrame(tk.Frame):
         canvas.get_tk_widget().pack(fill="both", expand=True)
     
     def setup_monthly_tab(self):
-        """Set up the Monthly Comparison tab"""
+        """
+        Configure the Monthly Comparison tab with a stacked bar chart.
+        
+        Creates a stacked bar chart showing monthly spending by category.
+        For demonstration purposes, this uses simulated data.
+        Displays a message if no expense data is available.
+        """
         # Title for the tab
         tk.Label(
             self.monthly_tab,

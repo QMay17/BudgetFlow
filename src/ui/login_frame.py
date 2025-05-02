@@ -3,7 +3,30 @@ from tkinter import ttk, messagebox
 from pathlib import Path
 
 class LoginFrame(tk.Frame):
+    """
+    Login screen for BudgetFlow application.
+    
+    This class creates the login interface with username and password fields,
+    login and back buttons, and handles the authentication process.
+    
+    Attributes:
+        controller: Reference to the main application controller
+        canvas: Canvas widget for drawing text and containing the form
+        login_frame: Frame containing the login form elements
+        username_entry: Entry field for username input
+        password_entry: Entry field for password input (masked with *)
+    """
     def __init__(self, parent, controller):
+        """
+        Initialize the LoginFrame with all UI elements.
+        
+        Creates and positions the login form, title text, and navigation buttons.
+        Sets up event binding for responsive layout.
+        
+        Args:
+            parent: Parent widget that contains this frame
+            controller: Application controller for navigation and authentication
+        """
         super().__init__(parent)
         self.controller = controller
         
@@ -96,7 +119,19 @@ class LoginFrame(tk.Frame):
         self.on_resize(None)
     
     def on_resize(self, event):
-        """Handle window resize event"""
+        """
+        Handle window resize events to maintain responsive layout.
+        
+        Repositions the title and login form based on the new window dimensions,
+        ensuring all elements remain properly centered and visible.
+        
+        Args:
+            event: The Configure event containing new window dimensions.
+                   Can be None during initial setup.
+                   
+        Returns:
+            None: Early returns if window dimensions are invalid
+        """
         if event:
             # Update canvas size
             self.canvas.config(width=event.width, height=event.height)
@@ -113,7 +148,16 @@ class LoginFrame(tk.Frame):
             self.login_frame.place_configure(relx=0.5, rely=0.5)
     
     def login(self):
-        """Handle the login process"""
+        """
+        Handle the login authentication process.
+        
+        Validates input fields, authenticates credentials through the auth controller,
+        and navigates to the profile page on successful login. Shows an error message
+        when validation fails.
+        
+        Returns:
+            None: Early returns if validation fails
+        """
         username = self.username_entry.get()
         password = self.password_entry.get()
 
