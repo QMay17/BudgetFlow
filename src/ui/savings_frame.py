@@ -282,8 +282,13 @@ class SavingsFrame(tk.Frame):
             messagebox.showerror("Invalid Input", "Please enter a valid positive number for the goal amount.")
             return
 
+        # Get user_id from controller
+        user_id = None
+        if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.is_authenticated():
+            user_id = self.controller.auth_controller.get_current_user().id
+
         # Load transactions and calculate saved amount
-        transactions = load_all_transactions()
+        transactions = load_all_transactions(user_id)
         saved_total = sum(tx["amount"] for tx in transactions 
                           if tx["type"].lower() == "saving" 
                           and tx["category"].lower() == category.lower())
@@ -363,8 +368,13 @@ class SavingsFrame(tk.Frame):
         days_remaining = (deadline_date - today).days
         weeks_remaining = max(1, days_remaining // 7)
         
+        # Get user_id from controller
+        user_id = None
+        if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.is_authenticated():
+            user_id = self.controller.auth_controller.get_current_user().id
+        
         # Get saved amount
-        transactions = load_all_transactions()
+        transactions = load_all_transactions(user_id)
         saved_total = sum(tx["amount"] for tx in transactions 
                           if tx["type"].lower() == "saving" 
                           and tx["category"].lower() == category.lower())

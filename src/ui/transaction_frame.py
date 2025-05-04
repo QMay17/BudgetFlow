@@ -93,6 +93,9 @@ class TransactionFrame(tk.Frame):
 
         # Bind resize event
         self.bind("<Configure>", self.on_resize)
+        
+        # Bind custom event for refreshing data when frame is shown
+        self.bind("<<FrameShown>>", lambda e: self.refresh_data())
 
         # Initial resize call to set positions
         self.update_idletasks()
@@ -109,8 +112,10 @@ class TransactionFrame(tk.Frame):
         Updates category summaries and totals for expenses, savings, and income.
         """
         user_id = None
-        if hasattr(self, 'user') and self.user:
-            user_id = self.user.id
+        # if hasattr(self, 'user') and self.user:
+        #     user_id = self.user.id
+        if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.is_authenticated():
+            user_id = self.controller.auth_controller.get_current_user().id
         
         # Clear existing transactions from the table
         for item in self.transaction_table.get_children():
@@ -119,6 +124,7 @@ class TransactionFrame(tk.Frame):
         # Reset summary values
         self.total_expenses = 0
         self.total_savings = 0
+        self.total_income = 0
         for category in self.expense_categories:
             self.expense_categories[category].config(text="$0.00")
         for category in self.saving_labels:
@@ -658,6 +664,17 @@ class TransactionFrame(tk.Frame):
             borderwidth=2,
             command=self.finish_session
         ).grid(row=0, column=1, padx=10)
+        
+        tk.Button(
+            self.button_frame,
+            text="Refresh",
+            font=("Comic Sans MS", 12),
+            bg="#b0c4de",
+            fg="#333333",
+            relief="ridge",
+            borderwidth=2,
+            command=self.refresh_data
+        ).grid(row=0, column=2, padx=10)
 
 
     def update_income(self):
@@ -688,6 +705,11 @@ class TransactionFrame(tk.Frame):
             amount = float(self.income_entry.get())
             income_type = self.income_type.get()
             
+            # Get the current user ID
+            user_id = None
+            if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.is_authenticated():
+                user_id = self.controller.auth_controller.get_current_user().id
+            
             # Add to total income
             self.total_income += amount
             self.income_value.config(text=f"${self.total_income:.2f}")
@@ -697,8 +719,11 @@ class TransactionFrame(tk.Frame):
             self.transaction_table.insert("", tk.END, values=(income_type, f"${amount:.2f}", "Income"))
             
             # Save to database
-            save_transaction(income_type, amount, "Income")
-            
+            transaction_id = save_transaction(income_type, amount, "Income", description=None, user_id=user_id)
+            if transaction_id is None:
+                messagebox.showerror("Error", "Failed to save income transaction. Please try again.")
+                return
+                
             # Clear income entry
             self.income_entry.delete(0, tk.END)
             
@@ -740,8 +765,14 @@ class TransactionFrame(tk.Frame):
 
         trans_type = self.type_var.get()
 
+        # Get the current user ID
+        user_id = None
+        if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.is_authenticated():
+            user_id = self.controller.auth_controller.get_current_user().id
+
+
         # Attempt to save to database
-        transaction_id = save_transaction(category, amount, trans_type, description=name)
+        transaction_id = save_transaction(category, amount, trans_type, description=name, user_id=user_id)
         if transaction_id is None:
             messagebox.showerror("Invalid Transaction", "Transaction was not saved. Please check your input.")
             return
@@ -1003,3 +1034,12 @@ class TransactionFrame(tk.Frame):
                 self.savings_summary_frame.grid(row=2, column=2, padx=20, pady=10, sticky="nsew")
                 self.table_frame.grid(row=3, column=0, columnspan=3, padx=30, pady=(30, 10), sticky="nsew")
                 self.button_frame.grid(row=5, column=0, columnspan=3, pady=20, sticky="n")
+
+    def refresh_data(self):
+        """
+        Refresh all transaction data.
+        
+        Reloads all transactions from the database for the current user
+        and updates the UI with the refreshed data.
+        """
+        self.load_transaction_data()

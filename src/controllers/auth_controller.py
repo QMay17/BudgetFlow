@@ -47,6 +47,10 @@ class AuthController:
         success, message = self.auth_manager.login(username, password)
         
         if success:
+            # Notify that auth state changed
+            if hasattr(self, 'on_auth_changed') and self.on_auth_changed:
+                self.on_auth_changed()
+                
             messagebox.showinfo("Success", "Login successful!")
             self.app_controller.show_frame("profile")
             return True

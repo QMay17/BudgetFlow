@@ -18,6 +18,7 @@ from src.ui.report_frame import ReportFrame
 from src.ui.transaction_frame import TransactionFrame
 from src.ui.savings_frame import SavingsFrame
 from src.controllers.auth_controller import AuthController
+from src.controllers.transaction_controller import TransactionController
 
 
 class BudgetFlowApp(tk.Tk):
@@ -42,6 +43,7 @@ class BudgetFlowApp(tk.Tk):
         """
         super().__init__()
         self.auth_controller = AuthController(self)
+        self.transaction_controller = TransactionController(self.auth_controller.auth_manager)
         
         # Configure the window
         self.title("BudgetFlow")
@@ -64,6 +66,9 @@ class BudgetFlowApp(tk.Tk):
          
         # Show the Welcome frame
         self.show_frame("welcome")
+        
+        # Set up the window close handler
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
     
     def setup_frames(self):
         """
@@ -122,6 +127,24 @@ class BudgetFlowApp(tk.Tk):
         """
         frame = self.frames[frame_name]
         frame.tkraise()
+        
+        # Trigger a custom event to notify the frame it's been shown
+        # This allows frames to refresh their data when displayed
+        frame.event_generate("<<FrameShown>>", when="tail")
+
+    def on_close(self):
+        """
+        Handle window close event.
+        
+        Ensures proper cleanup before closing the application.
+        """
+        # Perform any cleanup needed before shutdown
+        print("Application closing...")
+        
+        # Destroy the window and exit
+        self.destroy()
+        import sys
+        sys.exit(0)
 
 
 if __name__ == "__main__":

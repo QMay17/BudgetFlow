@@ -82,8 +82,21 @@ class ReportFrame(tk.Frame):
         )
         self.back_button.place(x=350, y=550)
         
+        # Add a refresh button
+        self.refresh_button = tk.Button(
+            self,
+            text="Refresh Data",
+            font=("Comic Sans MS", 12),
+            bg="#d4fcd4",
+            command=self.refresh_data
+        )
+        self.refresh_button.place(x=550, y=550)
+        
         # Handle resize events
         self.bind("<Configure>", self.on_resize)
+        
+        # Bind custom event for refreshing data when frame is shown
+        self.bind("<<FrameShown>>", lambda e: self.refresh_data())
     
     def on_resize(self, event):
         """
@@ -113,7 +126,10 @@ class ReportFrame(tk.Frame):
             self.canvas.itemconfig(self.notebook_window, width=notebook_width, height=notebook_height)
             
             # Update back button position
-            self.back_button.place(x=(width//2) - 75, y=height - 70)
+            self.back_button.place(x=(width//2) - 150, y=height - 70)
+            
+            # Update refresh button position
+            self.refresh_button.place(x=(width//2) + 50, y=height - 70)
     
     def setup_savings_tab(self):
         """
@@ -130,8 +146,13 @@ class ReportFrame(tk.Frame):
             bg="#f1e7e7"
         ).pack(pady=10)
         
+        # Get user_id from controller
+        user_id = None
+        if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.is_authenticated():
+            user_id = self.controller.auth_controller.get_current_user().id
+        
         # Get savings goals data
-        transactions = load_all_transactions()
+        transactions = load_all_transactions(user_id)
         saving_transactions = [tx for tx in transactions if tx['type'].lower() == 'saving']
         
         if not saving_transactions:
@@ -146,14 +167,18 @@ class ReportFrame(tk.Frame):
         # Create a figure for the pie chart
         fig, ax = plt.subplots(figsize=(6, 4))
 
-        # Group by category and name
+        # Group by category and description
         categories = {}
         for tx in saving_transactions:
             category = tx['category']
-            name = tx.get('description', 'Unnamed')  # Get name if available, default to 'Unnamed'
+            description = tx.get('description', '')
             amount = tx['amount']
-            label = f"{category} - {name} - {amount}"
-            amount = tx['amount']
+            
+            # Create a combined key for category and description
+            label = category
+            if description:
+                label = f"{category} - {description}"
+            
             if label in categories:
                 categories[label] += amount
             else:
@@ -191,8 +216,13 @@ class ReportFrame(tk.Frame):
             bg="#f1e7e7"
         ).pack(pady=10)
         
+        # Get user_id from controller
+        user_id = None
+        if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.is_authenticated():
+            user_id = self.controller.auth_controller.get_current_user().id
+        
         # Get transaction data
-        transactions = load_all_transactions()
+        transactions = load_all_transactions(user_id)
         expense_transactions = [tx for tx in transactions if tx['type'].lower() == 'expense']
         
         if not expense_transactions:
@@ -261,8 +291,13 @@ class ReportFrame(tk.Frame):
             bg="#f1e7e7"
         ).pack(pady=10)
         
+        # Get user_id from controller
+        user_id = None
+        if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.is_authenticated():
+            user_id = self.controller.auth_controller.get_current_user().id
+        
         # Get transaction data
-        transactions = load_all_transactions()
+        transactions = load_all_transactions(user_id)
         expense_transactions = [tx for tx in transactions if tx['type'].lower() == 'expense']
         
         if not expense_transactions:
@@ -308,3 +343,23 @@ class ReportFrame(tk.Frame):
         canvas = FigureCanvasTkAgg(fig, master=chart_frame)
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True)
+    
+    def refresh_data(self):
+        """
+        Refresh all report data.
+        
+        Clears and reloads all tabs with fresh data from the database
+        based on the current user's ID.
+        """
+        # Clear all tabs
+        for widget in self.savings_tab.winfo_children():
+            widget.destroy()
+        for widget in self.weekly_tab.winfo_children():
+            widget.destroy()
+        for widget in self.monthly_tab.winfo_children():
+            widget.destroy()
+            
+        # Reload all tabs
+        self.setup_savings_tab()
+        self.setup_weekly_tab()
+        self.setup_monthly_tab()
