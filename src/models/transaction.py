@@ -10,7 +10,7 @@ def save_transaction(category, amount, trans_type, description=None, user_id=Non
         amount (float): Transaction amount
         trans_type (str): Transaction type (e.g., 'Saving', 'Expense')
         description (str, optional): Transaction description
-        user_id (int, optional): ID of the user making the transaction
+        user_id (int): ID of the user making the transaction - REQUIRED
     
     Returns:
         int: ID of the inserted transaction, or None if failed
@@ -19,11 +19,16 @@ def save_transaction(category, amount, trans_type, description=None, user_id=Non
     cursor = conn.cursor()
     
     try:
-        # Use current user ID if not provided
+        # Validate user_id is provided
         if user_id is None:
-            # For simplicity, use user_id=1 if not logged in
-            user_id = 1
-        
+            print("[ERROR] user_id is required to save a transaction")
+            return None
+            
+        # Validate amount is positive
+        if amount <= 0:
+            print("[ERROR] Amount must be greater than zero")
+            return None
+            
         cursor.execute(
             "INSERT INTO transactions (user_id, category, amount, type, description, created_at) VALUES (?, ?, ?, ?, ?, ?)",
             (user_id, category, amount, trans_type, description, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -57,17 +62,15 @@ def load_all_transactions(user_id=None):
     cursor = conn.cursor()
     
     try:
-        if user_id:
+        if user_id is not None:
             rows = cursor.execute(
                 "SELECT id, category, amount, type, description, created_at FROM transactions WHERE user_id = ? ORDER BY created_at DESC",
                 (user_id,)
             ).fetchall()
+            return rows
         else:
-            rows = cursor.execute(
-                "SELECT id, category, amount, type, description, created_at FROM transactions ORDER BY created_at DESC"
-            ).fetchall()
-        
-        return rows
+            # Return empty list when no user_id is provided
+            return []
     
     except Exception as e:
         print(f"Error loading transactions: {e}")
@@ -92,18 +95,15 @@ def load_transactions_by_category(category, user_id=None):
     cursor = conn.cursor()
     
     try:
-        if user_id:
+        if user_id is not None:
             rows = cursor.execute(
                 "SELECT id, category, amount, type, description, created_at FROM transactions WHERE category = ? AND user_id = ? ORDER BY created_at DESC",
                 (category, user_id)
             ).fetchall()
+            return rows
         else:
-            rows = cursor.execute(
-                "SELECT id, category, amount, type, description, created_at FROM transactions WHERE category = ? ORDER BY created_at DESC",
-                (category,)
-            ).fetchall()
-        
-        return rows
+            # Return empty list when no user_id is provided
+            return []
     
     except Exception as e:
         print(f"Error loading transactions by category: {e}")
@@ -128,18 +128,15 @@ def load_transactions_by_type(trans_type, user_id=None):
     cursor = conn.cursor()
     
     try:
-        if user_id:
+        if user_id is not None:
             rows = cursor.execute(
                 "SELECT id, category, amount, type, description, created_at FROM transactions WHERE type = ? AND user_id = ? ORDER BY created_at DESC",
                 (trans_type, user_id)
             ).fetchall()
+            return rows
         else:
-            rows = cursor.execute(
-                "SELECT id, category, amount, type, description, created_at FROM transactions WHERE type = ? ORDER BY created_at DESC",
-                (trans_type,)
-            ).fetchall()
-        
-        return rows
+            # Return empty list when no user_id is provided
+            return []
     
     except Exception as e:
         print(f"Error loading transactions by type: {e}")
@@ -165,18 +162,15 @@ def load_transactions_by_date_range(start_date, end_date, user_id=None):
     cursor = conn.cursor()
     
     try:
-        if user_id:
+        if user_id is not None:
             rows = cursor.execute(
                 "SELECT id, category, amount, type, description, created_at FROM transactions WHERE date(created_at) BETWEEN date(?) AND date(?) AND user_id = ? ORDER BY created_at DESC",
                 (start_date, end_date, user_id)
             ).fetchall()
+            return rows
         else:
-            rows = cursor.execute(
-                "SELECT id, category, amount, type, description, created_at FROM transactions WHERE date(created_at) BETWEEN date(?) AND date(?) ORDER BY created_at DESC",
-                (start_date, end_date)
-            ).fetchall()
-        
-        return rows
+            # Return empty list when no user_id is provided
+            return []
     
     except Exception as e:
         print(f"Error loading transactions by date range: {e}")
@@ -271,17 +265,15 @@ def get_spending_summary(user_id=None):
     cursor = conn.cursor()
     
     try:
-        if user_id:
+        if user_id is not None:
             rows = cursor.execute(
                 "SELECT category, SUM(amount) as total FROM transactions WHERE type = 'Expense' AND user_id = ? GROUP BY category",
                 (user_id,)
             ).fetchall()
+            return {row['category']: row['total'] for row in rows}
         else:
-            rows = cursor.execute(
-                "SELECT category, SUM(amount) as total FROM transactions WHERE type = 'Expense' GROUP BY category"
-            ).fetchall()
-        
-        return {row['category']: row['total'] for row in rows}
+            # Return empty dict when no user_id is provided
+            return {}
     
     except Exception as e:
         print(f"Error getting spending summary: {e}")
@@ -304,17 +296,15 @@ def get_savings_summary(user_id=None):
     cursor = conn.cursor()
     
     try:
-        if user_id:
+        if user_id is not None:
             rows = cursor.execute(
                 "SELECT category, SUM(amount) as total FROM transactions WHERE type = 'Saving' AND user_id = ? GROUP BY category",
                 (user_id,)
             ).fetchall()
+            return {row['category']: row['total'] for row in rows}
         else:
-            rows = cursor.execute(
-                "SELECT category, SUM(amount) as total FROM transactions WHERE type = 'Saving' GROUP BY category"
-            ).fetchall()
-        
-        return {row['category']: row['total'] for row in rows}
+            # Return empty dict when no user_id is provided
+            return {}
     
     except Exception as e:
         print(f"Error getting savings summary: {e}")

@@ -18,6 +18,7 @@ from src.ui.report_frame import ReportFrame
 from src.ui.transaction_frame import TransactionFrame
 from src.ui.savings_frame import SavingsFrame
 from src.controllers.auth_controller import AuthController
+from src.controllers.transaction_controller import TransactionController
 
 
 class BudgetFlowApp(tk.Tk):
@@ -33,7 +34,7 @@ class BudgetFlowApp(tk.Tk):
         container (tk.Frame): Main container for all frames
         frames (dict): Dictionary storing all UI frames
     """
-    def __init__(self):
+    def __init__(self, parent, controller, user=None):
         """
         Initialize the BudgetFlow application.
         
@@ -42,6 +43,7 @@ class BudgetFlowApp(tk.Tk):
         """
         super().__init__()
         self.auth_controller = AuthController(self)
+        self.transaction_controller = TransactionController(self.auth_controller.auth_manager)
         
         # Configure the window
         self.title("BudgetFlow")

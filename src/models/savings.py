@@ -1,6 +1,6 @@
 from .database import get_transactions_db_connection as get_db_connection, dict_factory
 from datetime import datetime
-from .transaction import load_transactions_by_category
+from src.models.transaction import *
 
 
 def create_savings_goal(user_id, name, category, target_amount, deadline=None):

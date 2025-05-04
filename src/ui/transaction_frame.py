@@ -109,8 +109,10 @@ class TransactionFrame(tk.Frame):
         Updates category summaries and totals for expenses, savings, and income.
         """
         user_id = None
-        if hasattr(self, 'user') and self.user:
-            user_id = self.user.id
+        # if hasattr(self, 'user') and self.user:
+        #     user_id = self.user.id
+        if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.is_authenticated():
+            user_id = self.controller.auth_controller.get_current_user().id
         
         # Clear existing transactions from the table
         for item in self.transaction_table.get_children():
@@ -740,8 +742,14 @@ class TransactionFrame(tk.Frame):
 
         trans_type = self.type_var.get()
 
+        # Get the current user ID
+        user_id = None
+        if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.is_authenticated():
+            user_id = self.controller.auth_controller.get_current_user().id
+
+
         # Attempt to save to database
-        transaction_id = save_transaction(category, amount, trans_type, description=name)
+        transaction_id = save_transaction(category, amount, trans_type, description=name, user_id=user_id)
         if transaction_id is None:
             messagebox.showerror("Invalid Transaction", "Transaction was not saved. Please check your input.")
             return

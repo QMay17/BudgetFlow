@@ -2,7 +2,7 @@ from src.models import transaction
 
 
 class TransactionManager:
-    def __init__(self, user_id=1):
+    def __init__(self, user_id=None):
         self.user_id = user_id
 
     def add(self, category, amount, trans_type, description=None):
