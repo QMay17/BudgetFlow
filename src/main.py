@@ -34,7 +34,7 @@ class BudgetFlowApp(tk.Tk):
         container (tk.Frame): Main container for all frames
         frames (dict): Dictionary storing all UI frames
     """
-    def __init__(self, parent, controller, user=None):
+    def __init__(self):
         """
         Initialize the BudgetFlow application.
         
@@ -66,6 +66,9 @@ class BudgetFlowApp(tk.Tk):
          
         # Show the Welcome frame
         self.show_frame("welcome")
+        
+        # Set up the window close handler
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
     
     def setup_frames(self):
         """
@@ -124,6 +127,24 @@ class BudgetFlowApp(tk.Tk):
         """
         frame = self.frames[frame_name]
         frame.tkraise()
+        
+        # Trigger a custom event to notify the frame it's been shown
+        # This allows frames to refresh their data when displayed
+        frame.event_generate("<<FrameShown>>", when="tail")
+
+    def on_close(self):
+        """
+        Handle window close event.
+        
+        Ensures proper cleanup before closing the application.
+        """
+        # Perform any cleanup needed before shutdown
+        print("Application closing...")
+        
+        # Destroy the window and exit
+        self.destroy()
+        import sys
+        sys.exit(0)
 
 
 if __name__ == "__main__":
