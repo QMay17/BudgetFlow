@@ -29,6 +29,8 @@ BudgetFlow/
 │   │   ├── transaction.py  # Transaction data model and schema
 │   │   ├── category.py     # Expense and income category definitions
 │   │   └── database.py     # Database connection setup
+│   │   ├── savings.py      # Logic for savings and goals
+       
 │   
 │   └── utils/              # Utility functions and helpers
 │       ├── __init__.py

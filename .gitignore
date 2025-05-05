@@ -7,9 +7,11 @@ __pycache__/
 
 # Databases and OS files
 *.db
-data/users.db
-data/transactions.db
 .DS_Store
 
 # Environment variables
 .env
+
+# Ignore files in data/ but keep the directory
+data/*
+!data/.keep

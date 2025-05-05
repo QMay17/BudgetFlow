@@ -91,6 +91,20 @@ BudgetFlow is a personal budgeting application designed to help users manage and
 2. Select the date range and categories to analyze
 3. View your spending patterns and saving progress
 
+## Known Bugs or Limitations
+
+- **Responsive UI Scaling:** Some UI elements (like chart labels or suggestion text) may not always adjust perfectly when resizing the window to very large dimensions.
+- **No Password Reset:** There is no feature to reset or change a user’s password after registration.
+- **No Input Sanitization for Descriptions:** Special characters in transaction descriptions are stored as-is.
+- **No Recurring Transactions:** BudgetFlow currently does not support recurring expense/saving entries (e.g., monthly rent).
+- **Single User Session:** The app supports one user login at a time and does not support multiple concurrent sessions.
+- **Form Field Persistence:** After navigating from login to register and back, the previously entered username/password fields are not cleared. This may lead to confusion or unintended data being submitted.
+
+
+
+### File Structure Overview
+To view more details of each file, navigate to the file_directory.txt
+
 
 ## Contributing
 We welcome contributions to BudgetFlow! Please follow these steps:
