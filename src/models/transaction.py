@@ -28,6 +28,12 @@ def save_transaction(category, amount, trans_type, description=None, user_id=Non
         if amount <= 0:
             print("[ERROR] Amount must be greater than zero")
             return None
+        
+        # Validate transaction type
+        if trans_type.lower() not in ("saving", "expense", "income"):
+            print("[ERROR] Invalid transaction type")
+            return None
+
             
         cursor.execute(
             "INSERT INTO transactions (user_id, category, amount, type, description, created_at) VALUES (?, ?, ?, ?, ?, ?)",
