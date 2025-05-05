@@ -36,7 +36,6 @@ def save_transaction(category, amount, trans_type, description=None, user_id=Non
         
         transaction_id = cursor.lastrowid
         conn.commit()
-        print(f"[DEBUG] ✅ Transaction saved → {trans_type} | {category} | ${amount:.2f} | user_id={user_id}")
         return transaction_id
     
     except Exception as e:

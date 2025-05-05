@@ -32,7 +32,7 @@ class AuthManager:
         try:
             # Create new user
             user = User.create(username, email, full_name, password)
-            print(f"[DEBUG] User successfully registered: {user}")
+            print(f"User successfully registered: {user}")
             self.current_user = user
             return True, "Registration successful"
         except ValueError as e:

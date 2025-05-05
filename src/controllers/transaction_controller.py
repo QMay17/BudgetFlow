@@ -17,10 +17,8 @@ class TransactionController:
         """Update the controller with the current user's ID"""
         if self.auth_manager and self.auth_manager.current_user:
             self.user_id = self.auth_manager.current_user.id
-            print(f"[DEBUG] TransactionController: Using user_id={self.user_id}")
         else:
             self.user_id = None
-            print("[DEBUG] TransactionController: No user logged in")
     
     def add_transaction(self, category, amount, trans_type, description=None):
         """Add a transaction for the current user"""

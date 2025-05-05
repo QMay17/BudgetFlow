@@ -181,7 +181,7 @@ class SavingsFrame(tk.Frame):
         # Create a frame for the chart (right side)
         self.chart_frame = tk.Frame(self, bg="#f1e7e7", padx=20, pady=20, relief="ridge", bd=2)
         self.chart_window = self.canvas.create_window(
-            550, 270,  # Adjust y-coordinate to match form frame
+            550, 270,  
             window=self.chart_frame,
             width=500,  
             height=400,  
@@ -207,6 +207,22 @@ class SavingsFrame(tk.Frame):
             borderwidth=2,
             command=lambda: controller.show_frame("profile")
         ).pack(pady=10)
+
+
+        self.text_label = tk.Label(
+            self.canvas,
+            text="",
+            font=("Comic Sans MS", 10),
+            bg="#f1e7e7",
+            fg="#333333",
+            wraplength=700,
+            justify="center"
+        )
+        self.suggestion_window = self.canvas.create_window(
+            400, 520,
+            window=self.text_label,
+            anchor="center"
+        )
         
         # Bind resize event
         self.bind("<Configure>", self.on_resize)
@@ -343,7 +359,7 @@ class SavingsFrame(tk.Frame):
         """
         self.clear_chart()
         category = self.goal_dropdown.get()
-        
+
         # Validate inputs
         try:
             goal_amount = float(self.goal_amount_entry.get())
@@ -352,7 +368,7 @@ class SavingsFrame(tk.Frame):
         except ValueError:
             messagebox.showerror("Invalid Input", "Please enter a valid positive number for the goal amount.")
             return
-            
+
         deadline = self.deadline_entry.get()
         try:
             deadline_date = datetime.strptime(deadline, "%Y-%m-%d")
@@ -367,68 +383,74 @@ class SavingsFrame(tk.Frame):
         # Calculate weeks remaining
         days_remaining = (deadline_date - today).days
         weeks_remaining = max(1, days_remaining // 7)
-        
+
         # Get user_id from controller
         user_id = None
         if hasattr(self.controller, 'auth_controller') and self.controller.auth_controller.is_authenticated():
             user_id = self.controller.auth_controller.get_current_user().id
-        
+
         # Get saved amount
         transactions = load_all_transactions(user_id)
         saved_total = sum(tx["amount"] for tx in transactions 
-                          if tx["type"].lower() == "saving" 
-                          and tx["category"].lower() == category.lower())
-        
+                        if tx["type"].lower() == "saving" 
+                        and tx["category"].lower() == category.lower())
+
         # Calculate weekly targets
         weekly_target = goal_amount / weeks_remaining
-        weekly_actual = saved_total / max(1, (today - today.replace(day=1)).days // 7)  # Current weekly average
-        
-        # Create bar chart
+        current_week = (today - today.replace(day=1)).days // 7 or 1
+        weekly_actual = saved_total / current_week
+
+        # Clear chart area
+        for widget in self.chart_frame.winfo_children():
+            widget.destroy()
+
+        # Chart only in chart_frame
+        self.chart_canvas = FigureCanvasTkAgg(plt.figure(figsize=(4, 3.5)), master=self.chart_frame)
         fig, ax = plt.subplots(figsize=(4, 3.5))
-        bars = ax.bar(
-            ["Weekly Target", "Weekly Saved"], 
-            [weekly_target, weekly_actual], 
-            color=["#fdd365", "#b0c4de"]
-        )
-        
-        # Add data labels
+        bars = ax.bar(["Weekly Target", "Weekly Saved"],
+                    [weekly_target, weekly_actual],
+                    color=["#fdd365", "#b0c4de"])
         for bar in bars:
             height = bar.get_height()
-            ax.text(
-                bar.get_x() + bar.get_width()/2., 
-                height + 5,
-                f'${height:.2f}',
-                ha='center', 
-                va='bottom', 
-                rotation=0
-            )
-            
+            ax.text(bar.get_x() + bar.get_width()/2., height + 5, f'${height:.2f}',
+                    ha='center', va='bottom')
         ax.set_title("Weekly Savings Target vs Actual")
         ax.set_ylabel("Amount ($)")
         plt.tight_layout()
 
-        # Display chart
-        for widget in self.chart_frame.winfo_children():
-            widget.destroy()
-            
         self.chart_canvas = FigureCanvasTkAgg(fig, master=self.chart_frame)
         self.chart_canvas.draw()
-        self.chart_canvas.get_tk_widget().pack(fill="both", expand=True)
-        
-        # Show smart suggestion
+        self.chart_canvas.get_tk_widget().pack(pady=10)
+
+        #  Suggestion goes below chart_frame, into self (parent frame)
         remaining = max(0, goal_amount - saved_total)
-        
-        suggestion = f"You need to save ~${weekly_target:.2f} per week to meet your goal by {deadline_date.strftime('%Y-%m-%d')}."
-        
+        try:
+            weekly_needed = remaining / weeks_remaining
+        except ZeroDivisionError:
+            weekly_needed = 0.0
+
+        suggestion = f"You need to save ~${weekly_needed:.2f} per week to meet your goal by {deadline_date.strftime('%Y-%m-%d')}."
+       
+
+        # Destroy previous if exists
+        if self.text_label and self.text_label.winfo_exists():
+            self.text_label.destroy()
+
         self.text_label = tk.Label(
-            self.chart_frame, 
-            text=suggestion, 
-            font=("Comic Sans MS", 10), 
-            bg="#fff8e0", 
+            self.canvas,  # attach to canvas
+            text=suggestion,
+            font=("Comic Sans MS", 10),
+            bg="#f1e7e7",
             fg="#333333",
-            wraplength=300
+            wraplength=700,
+            justify="center"
         )
-        self.text_label.pack(pady=5)
+
+        self.canvas.create_window(
+            400, 520,  
+            window=self.text_label,
+            anchor="center"
+        )
 
     def clear_chart(self):
         """
@@ -440,6 +462,7 @@ class SavingsFrame(tk.Frame):
         if self.chart_canvas:
             self.chart_canvas.get_tk_widget().destroy()
             self.chart_canvas = None
-        if self.text_label:
+        if self.text_label and self.text_label.winfo_exists():
             self.text_label.destroy()
-            self.text_label = None
+        self.text_label = None
+
