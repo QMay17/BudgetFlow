@@ -188,6 +188,22 @@ class SavingsFrame(tk.Frame):
             anchor="center"
         )
         
+        # Create a dedicated suggestion label below both frames
+        self.suggestion_label = tk.Label(
+            self,
+            text="",
+            font=("Comic Sans MS", 10),
+            bg="#f1e7e7",
+            fg="#333333",
+            wraplength=700,
+            justify="center"
+        )
+        self.suggestion_window = self.canvas.create_window(
+            400, 520,
+            window=self.suggestion_label,
+            anchor="center"
+        )
+        
         # Navigation buttons
         self.nav_button_frame = tk.Frame(self, bg="#f1e7e7")
         self.nav_button_window = self.canvas.create_window(
@@ -207,22 +223,6 @@ class SavingsFrame(tk.Frame):
             borderwidth=2,
             command=lambda: controller.show_frame("profile")
         ).pack(pady=10)
-
-
-        self.text_label = tk.Label(
-            self.canvas,
-            text="",
-            font=("Comic Sans MS", 10),
-            bg="#f1e7e7",
-            fg="#333333",
-            wraplength=700,
-            justify="center"
-        )
-        self.suggestion_window = self.canvas.create_window(
-            400, 520,
-            window=self.text_label,
-            anchor="center"
-        )
         
         # Bind resize event
         self.bind("<Configure>", self.on_resize)
@@ -275,8 +275,11 @@ class SavingsFrame(tk.Frame):
             self.canvas.coords(self.chart_window, right_pos, center_y)
             self.canvas.itemconfig(self.chart_window, width=chart_width, height=chart_height)
             
+            # Update suggestion label - position below both frames
+            self.canvas.coords(self.suggestion_window, center, center_y + form_height/2 + 40)
+            
             # Update navigation buttons
-            self.canvas.coords(self.nav_button_window, width/2, center_y + form_height/2 + 50)
+            self.canvas.coords(self.nav_button_window, width/2, center_y + form_height/2 + 80)
     
     def show_pie_chart(self):
         """
@@ -289,6 +292,8 @@ class SavingsFrame(tk.Frame):
         Validates user input before creating the chart.
         """
         self.clear_chart()
+        self.suggestion_label.config(text="")  # Clear any existing suggestion
+        
         category = self.goal_dropdown.get()
         try:
             goal_amount = float(self.goal_amount_entry.get())
@@ -405,7 +410,6 @@ class SavingsFrame(tk.Frame):
             widget.destroy()
 
         # Chart only in chart_frame
-        self.chart_canvas = FigureCanvasTkAgg(plt.figure(figsize=(4, 3.5)), master=self.chart_frame)
         fig, ax = plt.subplots(figsize=(4, 3.5))
         bars = ax.bar(["Weekly Target", "Weekly Saved"],
                     [weekly_target, weekly_actual],
@@ -420,9 +424,9 @@ class SavingsFrame(tk.Frame):
 
         self.chart_canvas = FigureCanvasTkAgg(fig, master=self.chart_frame)
         self.chart_canvas.draw()
-        self.chart_canvas.get_tk_widget().pack(pady=10)
+        self.chart_canvas.get_tk_widget().pack(fill="both", expand=True)
 
-        #  Suggestion goes below chart_frame, into self (parent frame)
+        # Update the suggestion text
         remaining = max(0, goal_amount - saved_total)
         try:
             weekly_needed = remaining / weeks_remaining
@@ -430,27 +434,9 @@ class SavingsFrame(tk.Frame):
             weekly_needed = 0.0
 
         suggestion = f"You need to save ~${weekly_needed:.2f} per week to meet your goal by {deadline_date.strftime('%Y-%m-%d')}."
-       
-
-        # Destroy previous if exists
-        if self.text_label and self.text_label.winfo_exists():
-            self.text_label.destroy()
-
-        self.text_label = tk.Label(
-            self.canvas,  # attach to canvas
-            text=suggestion,
-            font=("Comic Sans MS", 10),
-            bg="#f1e7e7",
-            fg="#333333",
-            wraplength=700,
-            justify="center"
-        )
-
-        self.canvas.create_window(
-            400, 520,  
-            window=self.text_label,
-            anchor="center"
-        )
+        
+        # Update the shared suggestion label below both frames
+        self.suggestion_label.config(text=suggestion)
 
     def clear_chart(self):
         """
@@ -462,7 +448,7 @@ class SavingsFrame(tk.Frame):
         if self.chart_canvas:
             self.chart_canvas.get_tk_widget().destroy()
             self.chart_canvas = None
+        
         if self.text_label and self.text_label.winfo_exists():
             self.text_label.destroy()
-        self.text_label = None
-
+            self.text_label = None
