@@ -52,29 +52,6 @@ BudgetFlow is a personal budgeting application designed to help users manage and
    ```
 
 
-## Project Structure
-
-BudgetFlow/
-
-├── src/                  # Source code
-
-│   ├── controllers/      # Application logic
-
-│   ├── core/             # Core business logic
-
-│   ├── models/           # Data models
-
-│   ├── ui/               # User interface components
-
-│   └── utils/            # Utility functions
-
-├── tests/                # Test suite
-
-├── data/                 # Database storage
-
-└── docs/                 # Documentation
-
-
 ## Technologies Used
 
 - **Backend**: Python 3.8+
